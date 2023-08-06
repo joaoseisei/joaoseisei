@@ -1,5 +1,5 @@
 # Hi 👋, I'am Jao
-
+<img src="https://raw.githubusercontent.com/MicaelliMedeiros/micaellimedeiros/master/image/computer-illustration.png" min-width="400px" max-width="400px" width="400px" align="right">
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=joaoseisei&color=blue" alt="Profile views" /> </p>
 
 - 🔭 I'm currently studying Software Engineering
