@@ -12,7 +12,7 @@ document.body.appendChild(renderizador.domElement);
 camera.position.z = 5;
 
 const material = new THREE.MeshBasicMaterial({color: 0x708188});
-const cubo = new THREE.Mesh(new THREE.BoxGeometry(), material);
+const cubo = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), material);
 cena.add(cubo);
 
 /**
