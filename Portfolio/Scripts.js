@@ -1,4 +1,5 @@
-import * as THREE from "https://unpkg.com/three/build/three.module.js";
+import * as THREE from "three";
+import {GLTFLoader} from "three/loaders/GLTFLoader";
 
 console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
@@ -38,7 +39,7 @@ const cubo = new THREE.Mesh(
     new THREE.MeshStandardMaterial({map: texture})
 );
 cubo.castShadow = true;
-cena.add(cubo);
+//cena.add(cubo);
 
 
 const chao = new THREE.Mesh(
@@ -53,6 +54,16 @@ cena.add(chao);
 function girarOBJ(obj){
     obj.rotation.y += 0.01;
 }
+
+const loader = new GLTFLoader();
+loader.load("resources/Models/scene.gltf",(gltf)=> {
+    const gltfModel = gltf.scene;
+    gltfModel.scale.set(0.5,0.5,0.5);
+    gltfModel.position.set(0,0,0)
+    gltfModel.rotation.y = Math.PI / 2;
+    gltfModel.castShadow = true;
+    cena.add(gltfModel);
+});
 
 /**
  * Mostra o direcionamento dos raios de luz.
@@ -83,3 +94,4 @@ function animate(){
     girarOBJ(line)
     girarOBJ(cubo);
 }animate();
+
