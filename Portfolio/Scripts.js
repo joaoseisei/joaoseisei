@@ -7,9 +7,7 @@ document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 const cena = new THREE.Scene();
 
 const renderizador = new THREE.WebGLRenderer();
-renderizador.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderizador.domElement);
-
 renderizador.shadowMap.enabled = true;
 renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -22,60 +20,66 @@ luz.position.set(5, 5 , 0);
 luz.castShadow = true;
 cena.add(luz);
 //-------------------------------OBJETOS------------------------------
-const material = new THREE.LineBasicMaterial({color: 0x000000});
 const points = [];
 points.push( new THREE.Vector3( - 3, 0, 0 ) );
 points.push( new THREE.Vector3( 3, 0, 0 ) );
-const geometry = new THREE.BufferGeometry().setFromPoints(points);
-const line = new THREE.Line(geometry, material);
+const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(points),
+    new THREE.LineBasicMaterial({color: 0x000000})
+);
 line.castShadow = true;
 cena.add(line);
 
-const textureURL = "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/crate.gif"
+const textureURL = "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/crate.gif";
 const texture = new THREE.TextureLoader().load(textureURL);
 texture.colorSpace = THREE.SRGBColorSpace;
-const cor = new THREE.MeshStandardMaterial({map: texture});
-const geometriaCubo = new THREE.BoxGeometry(2, 2, 2)
-const cubo = new THREE.Mesh(geometriaCubo, cor);
+const cubo = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 2, 2),
+    new THREE.MeshStandardMaterial({map: texture})
+);
 cubo.castShadow = true;
 cena.add(cubo);
-function onClick(){
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(mouse, camera);
 
-    const intersects = raycaster.intersectObject(cubo);
-    if (intersects.length > 0) {
-        console.log("caixa abrindo");
-    }
-};
 
-renderizador.domElement.addEventListener("click", onClick);
-
-const corChao = new THREE.MeshStandardMaterial({color : 0xffffff})
-const chao = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), corChao);
+const chao = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 40),
+    new THREE.MeshStandardMaterial({color : 0xffffff})
+);
 chao.position.set(0,-2, 0);
 chao.rotation.x = -Math.PI / 2;
 chao.receiveShadow = true;
 cena.add(chao);
 
-
-function ativarLuz(){
-    const helper = new THREE.CameraHelper( luz.shadow.camera );
-    cena.add( helper );
-}ativarLuz()
-
 function girarOBJ(obj){
     obj.rotation.y += 0.01;
 }
 
+/**
+ * Mostra o direcionamento dos raios de luz.
+ * @param objLuz Luz a ser visualizada.
+ */
+function ativarLuz(objLuz){
+    const linhasGuia = new THREE.CameraHelper(objLuz.shadow.camera);
+    cena.add(linhasGuia);
+}ativarLuz(luz)
+
+/**
+ * Atualiza as proporções da tela.
+ */
+function atualizarProporcao(){
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderizador.setSize(window.innerWidth, window.innerHeight);
+}atualizarProporcao();
+window.addEventListener("resize", atualizarProporcao);
+
+/**
+ * Anima a tela.
+ */
 function animate(){
     requestAnimationFrame(animate);
+    renderizador.render(cena, camera);
+
     girarOBJ(line)
     girarOBJ(cubo);
-    renderizador.render(cena, camera);
-}
-animate();
-
+}animate();
