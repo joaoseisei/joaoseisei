@@ -23,37 +23,41 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHei
 const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 document.body.addEventListener('click', () => controle.lock());
-document.addEventListener('keypress', (event)=> {
-    if(identificadorTeclas[event.code] !== undefined) identificadorTeclas[event.code]();
+
+
+let velocidade = 0.2;
+const teclasPressionadas = new Set();
+document.addEventListener('keydown', event => {
+    teclasPressionadas.add(event.code);
 });
-
-
-let velocidade = 0.1;
-
-const identificadorTeclas = {
-     KeyW(){
-         console.log("teste");
-         controle.moveForward(velocidade);
-     },
-     KeyS(){
-         controle.moveForward(-velocidade);
-     },
-     KeyA(){
-         controle.moveRight(-velocidade);
-     },
-     KeyD(){
-         controle.moveRight(velocidade);
-     }
+document.addEventListener('keyup', event => {
+    teclasPressionadas.delete(event.code);
+    if(event.code === "ShiftLeft") velocidade = 0.2;
+});
+function atualizarPassos(){
+    if(teclasPressionadas.size !== 0){
+        teclasPressionadas.forEach(teclas =>{
+            if(identificadorTeclas[teclas] !== undefined) identificadorTeclas[teclas]();
+        });
+    }
 }
-
-
-
-
-
-
-
-
-
+let identificadorTeclas = {
+    KeyW(){
+         controle.moveForward(velocidade);
+    },
+    KeyS(){
+         controle.moveForward(-velocidade);
+    },
+    KeyA(){
+         controle.moveRight(-velocidade);
+    },
+    KeyD(){
+         controle.moveRight(velocidade);
+    },
+    ShiftLeft(){
+        velocidade = 0.35;
+    }
+}
 
 
 //--------------------------------LUZ---------------------------------
@@ -149,4 +153,5 @@ window.addEventListener("resize", atualizarProporcao);
 function animate(){
     requestAnimationFrame(animate);
     renderizador.render(cena, camera);
+    atualizarPassos();
 }animate();
