@@ -1,6 +1,8 @@
 import * as THREE from "https://unpkg.com/three@0.155.0/build/three.module.js";
 import {GLTFLoader} from "https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js";
 import {OrbitControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/OrbitControls.js";
+import {FirstPersonControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/FirstPersonControls.js";
+import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/PointerLockControls.js";
 
 console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
@@ -11,17 +13,49 @@ const GLTF = new GLTFLoader();
 const cena = new THREE.Scene();
 
 const renderizador = new THREE.WebGLRenderer();
-const canvas = renderizador.domElement;
-document.body.appendChild(renderizador.domElement);
 renderizador.shadowMap.enabled = true;
 renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
-camera.position.set( 0, 3, 8);
+document.body.appendChild(renderizador.domElement);
 
-const controleCamera = new OrbitControls(camera, canvas);
-controleCamera.enableDamping = true;
-controleCamera.dampingFactor = 0.3;
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
+
+const controle = new PointerLockControls(camera, renderizador.domElement);
+cena.add(controle.getObject());
+document.body.addEventListener('click', () => controle.lock());
+document.addEventListener('keypress', (event)=> {
+    if(identificadorTeclas[event.code] !== undefined) identificadorTeclas[event.code]();
+});
+
+
+let velocidade = 0.1;
+
+const identificadorTeclas = {
+     KeyW(){
+         console.log("teste");
+         controle.moveForward(velocidade);
+     },
+     KeyS(){
+         controle.moveForward(-velocidade);
+     },
+     KeyA(){
+         controle.moveRight(-velocidade);
+     },
+     KeyD(){
+         controle.moveRight(velocidade);
+     }
+}
+
+
+
+
+
+
+
+
+
+
+
 //--------------------------------LUZ---------------------------------
 const luz = new THREE.PointLight(0xB0C4DE, 35, 100 );
 luz.position.set(5, 5 , 0);
@@ -33,7 +67,7 @@ luz2.castShadow = true;
 cena.add(luz2);
 //-------------------------------CHAO---------------------------------
 const chao = new THREE.Mesh(
-    new THREE.PlaneGeometry(40, 40),
+    new THREE.PlaneGeometry(400, 400),
     new THREE.MeshStandardMaterial({color : 0xffffff})
 );
 chao.position.set(0,-2, 0);
@@ -93,13 +127,19 @@ function ativarLuz(objLuz){
     cena.add(linhasGuia);
 }
 
+
+let larguraTela;
+let alturaTela;
+let razaoTela;
 /**
  * Atualiza as proporções da tela.
  */
 function atualizarProporcao(){
-    camera.aspect = window.innerWidth/window.innerHeight;
+    larguraTela= window.innerWidth;
+    alturaTela = window.innerHeight
+    camera.aspect = razaoTela = larguraTela/alturaTela;
     camera.updateProjectionMatrix();
-    renderizador.setSize(window.innerWidth, window.innerHeight);
+    renderizador.setSize(larguraTela, alturaTela);
 }atualizarProporcao();
 window.addEventListener("resize", atualizarProporcao);
 
@@ -109,6 +149,4 @@ window.addEventListener("resize", atualizarProporcao);
 function animate(){
     requestAnimationFrame(animate);
     renderizador.render(cena, camera);
-    girarOBJ(peixeGLTF);
-    controleCamera.update();
 }animate();
