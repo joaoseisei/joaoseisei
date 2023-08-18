@@ -1,42 +1,44 @@
 import * as THREE from "https://unpkg.com/three@0.155.0/build/three.module.js";
 import {GLTFLoader} from "https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js";
-import {OrbitControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/OrbitControls.js";
-import {FirstPersonControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/FirstPersonControls.js";
 import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/PointerLockControls.js";
 
 console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 
-//--------------------------------CENA---------------------------------
 const GLTF = new GLTFLoader();
-
 const cena = new THREE.Scene();
-
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
 const renderizador = new THREE.WebGLRenderer();
 renderizador.shadowMap.enabled = true;
 renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
-
 document.body.appendChild(renderizador.domElement);
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
+
+let dimensoesTela ={largura: null, altura: null}
+function atualizarProporcao(){
+    dimensoesTela.larguraTela = window.innerWidth;
+    dimensoesTela.alturaTela = window.innerHeight;
+
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderizador.setSize(window.innerWidth, window.innerHeight);
+}atualizarProporcao();
+window.addEventListener("resize", atualizarProporcao);
+
 
 const controle = new PointerLockControls(camera, renderizador.domElement);
+const teclasPressionadas = new Set();
+let velocidade = 0.15;
 cena.add(controle.getObject());
 document.body.addEventListener('click', () => controle.lock());
-
-
-let velocidade = 0.2;
-const teclasPressionadas = new Set();
-document.addEventListener('keydown', event => {
-    teclasPressionadas.add(event.code);
-});
+document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
+document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
-    teclasPressionadas.delete(event.code);
-    if(event.code === "ShiftLeft") velocidade = 0.2;
+    if(event.code === "ShiftLeft") velocidade = 0.15;
 });
-function atualizarPassos(){
+function movimentacao(){
     if(teclasPressionadas.size !== 0){
-        teclasPressionadas.forEach(teclas =>{
+        teclasPressionadas.forEach(teclas => {
             if(identificadorTeclas[teclas] !== undefined) identificadorTeclas[teclas]();
         });
     }
@@ -55,10 +57,9 @@ let identificadorTeclas = {
          controle.moveRight(velocidade);
     },
     ShiftLeft(){
-        velocidade = 0.35;
+        velocidade = 0.25;
     }
 }
-
 
 //--------------------------------LUZ---------------------------------
 const luz = new THREE.PointLight(0xB0C4DE, 35, 100 );
@@ -132,20 +133,7 @@ function ativarLuz(objLuz){
 }
 
 
-let larguraTela;
-let alturaTela;
-let razaoTela;
-/**
- * Atualiza as proporções da tela.
- */
-function atualizarProporcao(){
-    larguraTela= window.innerWidth;
-    alturaTela = window.innerHeight
-    camera.aspect = razaoTela = larguraTela/alturaTela;
-    camera.updateProjectionMatrix();
-    renderizador.setSize(larguraTela, alturaTela);
-}atualizarProporcao();
-window.addEventListener("resize", atualizarProporcao);
+
 
 /**
  * Anima a tela.
@@ -153,5 +141,5 @@ window.addEventListener("resize", atualizarProporcao);
 function animate(){
     requestAnimationFrame(animate);
     renderizador.render(cena, camera);
-    atualizarPassos();
+    movimentacao();
 }animate();
