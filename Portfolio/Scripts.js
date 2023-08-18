@@ -19,6 +19,36 @@ function init(){
     atualizarProporcao();
 }init();
 
+let sky = new Sky();
+sky.scale.setScalar(5000);
+cena.add(sky);
+
+let sun = new THREE.Vector3();
+
+const effectController = {
+    turbidity: 20,
+    rayleigh: 0.558,
+    mieCoefficient: 0.009,
+    mieDirectionalG: 0.999998,
+    elevation: 15,
+    azimuth: -45,
+    exposure: renderizador.toneMappingExposure
+}
+
+const uniforms = sky.material.uniforms;
+uniforms['turbidity'].value = effectController.turbidity;
+uniforms['rayleigh'].value = effectController.rayleigh;
+uniforms['mieCoefficient'].value = effectController.mieCoefficient;
+uniforms['mieDirectionalG'].value = effectController.mieDirectionalG;
+
+const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
+const theta = THREE.MathUtils.degToRad(effectController.azimuth);
+
+sun.setFromSphericalCoords(1, phi, theta);
+sun.set(0,0,0)
+cena.add(sun);
+
+
 function atualizarProporcao(){
     dimensoesTela.larguraTela = window.innerWidth;
     dimensoesTela.alturaTela = window.innerHeight;
@@ -29,8 +59,6 @@ function atualizarProporcao(){
 }
 window.addEventListener("resize", atualizarProporcao);
 
-const ceu = new Sky();
-cena.add(ceu);
 
 const sunlight = new THREE.DirectionalLight(0xffffff, 1);
 sunlight.position.set(1, 1, 1);
