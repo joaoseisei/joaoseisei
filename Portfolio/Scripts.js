@@ -1,20 +1,24 @@
 import * as THREE from "https://unpkg.com/three@0.155.0/build/three.module.js";
 import {GLTFLoader} from "https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js";
 import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/PointerLockControls.js";
+import {Sky} from "https://unpkg.com/three@0.155.0/examples/jsm/objects/Sky.js";
 
 console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 
-const GLTF = new GLTFLoader();
-const cena = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
-const renderizador = new THREE.WebGLRenderer();
-renderizador.shadowMap.enabled = true;
-renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
-document.body.appendChild(renderizador.domElement);
-
-
 let dimensoesTela ={largura: null, altura: null}
+let cena, camera, renderizador;
+function init(){
+    cena = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
+    renderizador = new THREE.WebGLRenderer();
+    renderizador.shadowMap.enabled = true;
+    renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderizador.domElement);
+
+    atualizarProporcao();
+}init();
+
 function atualizarProporcao(){
     dimensoesTela.larguraTela = window.innerWidth;
     dimensoesTela.alturaTela = window.innerHeight;
@@ -22,20 +26,53 @@ function atualizarProporcao(){
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
     renderizador.setSize(window.innerWidth, window.innerHeight);
-}atualizarProporcao();
+}
 window.addEventListener("resize", atualizarProporcao);
 
+const ceu = new Sky();
+cena.add(ceu);
 
-const controle = new PointerLockControls(camera, renderizador.domElement);
+const sunlight = new THREE.DirectionalLight(0xffffff, 1);
+sunlight.position.set(1, 1, 1);
+cena.add(sunlight);
+
+
 const teclasPressionadas = new Set();
-let velocidade = 0.15;
+const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
+
+let velocidade = 0.15;
+let identificadorTeclas = {
+    KeyW(){
+        controle.moveForward(velocidade);
+    },
+    KeyS(){
+        controle.moveForward(-velocidade);
+    },
+    KeyA(){
+        controle.moveRight(-velocidade);
+    },
+    KeyD(){
+        controle.moveRight(velocidade);
+    },
+    ShiftLeft(){
+        velocidade = 0.25;
+    },
+    KeyE(){
+        controle.getObject().position.y += 0.15;
+    },
+    KeyQ(){
+        controle.getObject().position.y -= 0.15;
+    }
+}
+
 document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
     if(event.code === "ShiftLeft") velocidade = 0.15;
 });
+
 function movimentacao(){
     if(teclasPressionadas.size !== 0){
         teclasPressionadas.forEach(teclas => {
@@ -43,33 +80,7 @@ function movimentacao(){
         });
     }
 }
-let identificadorTeclas = {
-    KeyW(){
-         controle.moveForward(velocidade);
-    },
-    KeyS(){
-         controle.moveForward(-velocidade);
-    },
-    KeyA(){
-         controle.moveRight(-velocidade);
-    },
-    KeyD(){
-         controle.moveRight(velocidade);
-    },
-    ShiftLeft(){
-        velocidade = 0.25;
-    }
-}
 
-//--------------------------------LUZ---------------------------------
-const luz = new THREE.PointLight(0xB0C4DE, 35, 100 );
-luz.position.set(5, 5 , 0);
-luz.castShadow = true;
-cena.add(luz);
-const luz2 = new THREE.PointLight(0xB0C4DE, 35, 100 );
-luz2.position.set(-5, 5 , 0);
-luz2.castShadow = true;
-cena.add(luz2);
 //-------------------------------CHAO---------------------------------
 const chao = new THREE.Mesh(
     new THREE.PlaneGeometry(400, 400),
@@ -94,6 +105,7 @@ let cubo = criarCubo(2, "https://raw.githubusercontent.com/mrdoob/three.js/maste
 cubo.position.set(8,-1,-6)
 cena.add(cubo);
 
+const GLTF = new GLTFLoader();
 
 let peixeGLTF;
 GLTF.load("resources/Models/scene.gltf",(gltf)=> {
@@ -131,8 +143,6 @@ function ativarLuz(objLuz){
     const linhasGuia = new THREE.CameraHelper(objLuz.shadow.camera);
     cena.add(linhasGuia);
 }
-
-
 
 
 /**
