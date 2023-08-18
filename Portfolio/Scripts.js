@@ -7,47 +7,18 @@ console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 
 let dimensoesTela ={largura: null, altura: null}
-let cena, camera, renderizador;
+let cena, camera, renderizador, ceu, sol;
 function init(){
     cena = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
     renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderizador.domElement);
 
     atualizarProporcao();
+    initSky();
 }init();
-
-let sky = new Sky();
-sky.scale.setScalar(5000);
-cena.add(sky);
-
-let sun = new THREE.Vector3();
-
-const effectController = {
-    turbidity: 20,
-    rayleigh: 0.558,
-    mieCoefficient: 0.009,
-    mieDirectionalG: 0.999998,
-    elevation: 15,
-    azimuth: -45,
-    exposure: renderizador.toneMappingExposure
-}
-
-const uniforms = sky.material.uniforms;
-uniforms['turbidity'].value = effectController.turbidity;
-uniforms['rayleigh'].value = effectController.rayleigh;
-uniforms['mieCoefficient'].value = effectController.mieCoefficient;
-uniforms['mieDirectionalG'].value = effectController.mieDirectionalG;
-
-const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
-const theta = THREE.MathUtils.degToRad(effectController.azimuth);
-
-sun.setFromSphericalCoords(1, phi, theta);
-sun.set(0,0,0)
-cena.add(sun);
-
 
 function atualizarProporcao(){
     dimensoesTela.larguraTela = window.innerWidth;
@@ -59,11 +30,29 @@ function atualizarProporcao(){
 }
 window.addEventListener("resize", atualizarProporcao);
 
+function initSky(){
+    sol = new THREE.Vector3();
+    ceu = new Sky();
+    ceu.scale.setScalar( 10000 );
+    cena.add( ceu );
 
-const sunlight = new THREE.DirectionalLight(0xffffff, 1);
-sunlight.position.set(1, 1, 1);
-cena.add(sunlight);
+    const skyUniforms = ceu.material.uniforms;
+    skyUniforms.turbidity.value = 20;
+    skyUniforms.rayleigh.value = 0.558
+    skyUniforms.mieCoefficient.value = 0.009
+    skyUniforms.mieDirectionalG.value = 1;
 
+    function updateSun(a, b) {
+        const geradorReflexao = new THREE.PMREMGenerator(renderizador);
+        const phi = THREE.MathUtils.degToRad(a);
+        const theta = THREE.MathUtils.degToRad(b);
+
+        sol.setFromSphericalCoords(1, phi, theta);
+        ceu.material.uniforms.sunPosition.value.copy(sol);
+        cena.environment = geradorReflexao.fromScene(ceu).texture;
+    }
+    updateSun(75, -45);
+}
 
 const teclasPressionadas = new Set();
 const controle = new PointerLockControls(camera, renderizador.domElement);
@@ -177,7 +166,7 @@ function ativarLuz(objLuz){
  * Anima a tela.
  */
 function animate(){
-    requestAnimationFrame(animate);
     renderizador.render(cena, camera);
     movimentacao();
+    requestAnimationFrame(animate);
 }animate();
