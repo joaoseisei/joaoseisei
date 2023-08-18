@@ -6,8 +6,9 @@ import {Sky} from "https://unpkg.com/three@0.155.0/examples/jsm/objects/Sky.js";
 console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 
-let dimensoesTela ={largura: null, altura: null}
+let dimensoesTela = {largura: null, altura: null}
 let cena, camera, renderizador, ceu, sol;
+
 function init(){
     cena = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
@@ -33,14 +34,14 @@ window.addEventListener("resize", atualizarProporcao);
 function initSky(){
     sol = new THREE.Vector3();
     ceu = new Sky();
-    ceu.scale.setScalar( 10000 );
-    cena.add( ceu );
+    ceu.scale.setScalar(10000);
+    cena.add(ceu);
 
-    const skyUniforms = ceu.material.uniforms;
-    skyUniforms.turbidity.value = 20;
-    skyUniforms.rayleigh.value = 0.558
-    skyUniforms.mieCoefficient.value = 0.009
-    skyUniforms.mieDirectionalG.value = 1;
+    const ceuPropriedades = ceu.material.uniforms;
+    ceuPropriedades.turbidity.value = 10;
+    ceuPropriedades.rayleigh.value = 1;
+    ceuPropriedades.mieCoefficient.value = 0.005;
+    ceuPropriedades.mieDirectionalG.value = 0.9999;
 
     function updateSun(a, b) {
         const geradorReflexao = new THREE.PMREMGenerator(renderizador);
@@ -51,7 +52,7 @@ function initSky(){
         ceu.material.uniforms.sunPosition.value.copy(sol);
         cena.environment = geradorReflexao.fromScene(ceu).texture;
     }
-    updateSun(75, -45);
+    updateSun(80, 0);
 }
 
 const teclasPressionadas = new Set();
