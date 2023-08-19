@@ -72,11 +72,23 @@ function initSky(){
     updateSun(80, 0);
 }
 
+const GLTF = new GLTFLoader();
+let aviao;
+GLTF.load("resources/Models/Aviao/scene.gltf", gltf => {
+    aviao = gltf.scene;
+    aviao.rotation.x = THREE.MathUtils.degToRad(85);
+    aviao.rotation.z = THREE.MathUtils.degToRad(180);
+    aviao.position.set(0,-.5,-1.5);
+    camera.add(aviao);
+});
+
 const teclasPressionadas = new Set();
 const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let velocidade = 0.15;
+let y = 0;
+let x = 90;
 let identificadorTeclas = {
     KeyW(){
         controle.moveForward(velocidade);
@@ -86,18 +98,22 @@ let identificadorTeclas = {
     },
     KeyA(){
         controle.moveRight(-velocidade);
+        aviao.rotation.y = THREE.MathUtils.degToRad(y++);
     },
     KeyD(){
         controle.moveRight(velocidade);
+        aviao.rotation.y = THREE.MathUtils.degToRad(y--);
     },
     ShiftLeft(){
         velocidade = 0.25;
     },
     KeyE(){
         controle.getObject().position.y += 0.15;
+        aviao.rotation.x = THREE.MathUtils.degToRad(x++);
     },
     KeyQ(){
         controle.getObject().position.y -= 0.15;
+        aviao.rotation.x = THREE.MathUtils.degToRad(x--);
     }
 }
 
@@ -141,18 +157,6 @@ let cubo = criarCubo(10 , "https://raw.githubusercontent.com/mrdoob/three.js/mas
 cubo.position.set(8,-1,-6)
 cena.add(cubo);
 
-
-const GLTF = new GLTFLoader();
-
-let peixeGLTF;
-GLTF.load("resources/Models/scene.gltf",(gltf)=> {
-    peixeGLTF = gltf.scene;
-    peixeGLTF.scale.set(0.5,0.5,0.5);
-    peixeGLTF.position.set(-10,-3,0);
-    peixeGLTF.rotation.y = Math.PI / 2;
-    sombrearModelo(peixeGLTF);
-    cena.add(peixeGLTF);
-});
 
 
 /**
