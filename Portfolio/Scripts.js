@@ -111,15 +111,15 @@ let identificadorTeclas = {
     },
     KeyA(){
         controle.moveRight(-velocidade);
-        if(controleAviao.y+1 <= controleAviao.maxY)aviao.rotation.y = THREE.MathUtils.degToRad(controleAviao.y++);
+        if(controleAviao.y+1 <= controleAviao.maxY) controleAviao.y++;
         camera.rotateY(y++/2000);
-        if(controleAviao.z-1 >= controleAviao.minZ) aviao.rotation.z = THREE.MathUtils.degToRad(controleAviao.z--);
+        if(controleAviao.z-1 >= controleAviao.minZ) controleAviao.z--;
     },
     KeyD(){
         controle.moveRight(velocidade);
-        if(controleAviao.y-1 >= controleAviao.minY) aviao.rotation.y = THREE.MathUtils.degToRad(controleAviao.y--);
+        if(controleAviao.y-1 >= controleAviao.minY) controleAviao.y--
         camera.rotateY(y--/2000);
-        if(controleAviao.z+1 <= controleAviao.maxZ) aviao.rotation.z = THREE.MathUtils.degToRad(controleAviao.z++);
+        if(controleAviao.z+1 <= controleAviao.maxZ) controleAviao.z++
     },
     ShiftLeft(){
         velocidade = 0.25;
@@ -127,7 +127,7 @@ let identificadorTeclas = {
     KeyE(){
         controle.getObject().position.y += 0.05;
         if(controleAviao.x+1 <= controleAviao.maxX){
-            aviao.rotation.x = THREE.MathUtils.degToRad(controleAviao.x++);
+            controleAviao.x++;
             camera.rotateX(controleAviao.x/20000);
         }
 
@@ -135,19 +135,21 @@ let identificadorTeclas = {
     KeyQ(){
         controle.getObject().position.y -= 0.05;
         if(controleAviao.x-1 >= controleAviao.minX){
-            aviao.rotation.x = THREE.MathUtils.degToRad(controleAviao.x--);
+            controleAviao.x--;
             camera.rotateX(-controleAviao.x/20000);
         }
     }
 }
+
 
 document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
     if(event.code === "ShiftLeft") velocidade = 0.15;
-    if (event.code === 'KeyD' || event.code === 'KeyA') y *= 0.5;
+    if(event.code === 'KeyD' || event.code === 'KeyA') y *= 0.5;
 });
+
 
 function movimentacao(){
     if(teclasPressionadas.size !== 0){
@@ -155,6 +157,33 @@ function movimentacao(){
             if(identificadorTeclas[teclas] !== undefined) identificadorTeclas[teclas]();
         });
     }
+}
+
+function animador(){
+    if(aviao!==undefined){
+        aviao.rotation.set(THREE.MathUtils.degToRad(controleAviao.x),
+                           THREE.MathUtils.degToRad(controleAviao.y),
+                           THREE.MathUtils.degToRad(controleAviao.z));
+    }
+}
+
+function estabilizador(){
+
+    if(controleAviao.x !== 90.00){
+        if(!(teclasPressionadas.has('KeyE') || teclasPressionadas.has('KeyQ'))){
+            if(controleAviao.x > 90)controleAviao.x -= 1;
+            else controleAviao.x += 1;
+
+
+            console.log("nao pressionadas)");
+        }
+    }
+
+    if(controleAviao.y !== 0){
+
+    }
+
+
 }
 
 //-------------------------------CHAO---------------------------------
@@ -206,5 +235,7 @@ function ativarLuz(objLuz){
 function animate(){
     renderizador.render(cena, camera);
     movimentacao();
+    estabilizador();
+    animador();
     requestAnimationFrame(animate);
 }animate();
