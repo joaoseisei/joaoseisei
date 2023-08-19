@@ -79,6 +79,7 @@ GLTF.load("resources/Models/Aviao/scene.gltf", gltf => {
     aviao.rotation.x = THREE.MathUtils.degToRad(85);
     aviao.rotation.z = THREE.MathUtils.degToRad(180);
     aviao.position.set(0,-.5,-1.5);
+    sombrearModelo(aviao);
     camera.add(aviao);
 });
 
@@ -101,8 +102,12 @@ let controleAviao = {
     minX: 50,
     maxX: 110
 }
+
 let y = 0;
+let x = 0;
+
 let identificadorTeclas = {
+
     KeyW(){
         controle.moveForward(velocidade);
     },
@@ -111,33 +116,29 @@ let identificadorTeclas = {
     },
     KeyA(){
         controle.moveRight(-velocidade);
+        camera.rotateY(y++/2000);
         if(controleAviao.y+1 <= controleAviao.maxY) controleAviao.y++;
         if(controleAviao.z-1 >= controleAviao.minZ) controleAviao.z--;
-        camera.rotateY(y++/2000);
     },
     KeyD(){
         controle.moveRight(velocidade);
+        camera.rotateY(y--/2000);
         if(controleAviao.y-1 >= controleAviao.minY) controleAviao.y--
         if(controleAviao.z+1 <= controleAviao.maxZ) controleAviao.z++
-        camera.rotateY(y--/2000);
     },
     ShiftLeft(){
         velocidade = 0.25;
     },
     KeyE(){
         controle.getObject().position.y += 0.05;
-        if(controleAviao.x+1 <= controleAviao.maxX){
-            controleAviao.x++;
-            camera.rotateX(controleAviao.x/20000);
-        }
+        camera.rotateX(x++/10000);
+        if(controleAviao.x+1 <= controleAviao.maxX) controleAviao.x++;
 
     },
     KeyQ(){
         controle.getObject().position.y -= 0.05;
-        if(controleAviao.x-1 >= controleAviao.minX){
-            controleAviao.x--;
-            camera.rotateX(-controleAviao.x/20000);
-        }
+        camera.rotateX(x--/10000);
+        if(controleAviao.x-1 >= controleAviao.minX) controleAviao.x--;
     }
 }
 
@@ -148,8 +149,8 @@ document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code)
 document.addEventListener('keyup', event => {
     if(event.code === "ShiftLeft") velocidade = 0.15;
     if(event.code === 'KeyD' || event.code === 'KeyA') y *= 0.5;
+    if(event.code === 'KeyE' || event.code === 'KeyQ') x *= 0.1;
 });
-
 
 function movimentacao(){
     if(teclasPressionadas.size !== 0){
@@ -157,9 +158,11 @@ function movimentacao(){
             if(identificadorTeclas[teclas] !== undefined) identificadorTeclas[teclas]();
         });
     }
+    estabilizarAviao();
+    posicaoAviao();
 }
 
-function animador(){
+function posicaoAviao(){
     if(aviao!==undefined){
         aviao.rotation.set(THREE.MathUtils.degToRad(controleAviao.x),
                            THREE.MathUtils.degToRad(controleAviao.y),
@@ -167,7 +170,7 @@ function animador(){
     }
 }
 
-function estabilizador(){
+function estabilizarAviao(){
 
     if(controleAviao.x !== 90){
         if(!(teclasPressionadas.has('KeyE') || teclasPressionadas.has('KeyQ'))){
@@ -216,31 +219,14 @@ let cubo = criarCubo(10 , "https://raw.githubusercontent.com/mrdoob/three.js/mas
 cubo.position.set(8,-1,-6)
 cena.add(cubo);
 
-
-
-/**
- * Percorre todos os filhos de um obj e sombreia eles.
- * @param obj Objeto a ser sombreado.
- */
 function sombrearModelo(obj){
     obj.traverse(child => {
         if(child.isMesh) child.receiveShadow = child.castShadow = true;
     });
 }
 
-/**
- * Mostra o direcionamento dos raios de luz.
- * @param objLuz Luz a ser visualizada.
- */
-function ativarLuz(objLuz){
-    const linhasGuia = new THREE.CameraHelper(objLuz.shadow.camera);
-    cena.add(linhasGuia);
-}
-
 function animate(){
     renderizador.render(cena, camera);
     movimentacao();
-    estabilizador();
-    animador();
     requestAnimationFrame(animate);
 }animate();
