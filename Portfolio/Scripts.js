@@ -101,7 +101,7 @@ let controleAviao = {
     minX: 50,
     maxX: 110
 }
-
+let y = 0;
 let identificadorTeclas = {
     KeyW(){
         controle.moveForward(velocidade);
@@ -111,25 +111,33 @@ let identificadorTeclas = {
     },
     KeyA(){
         controle.moveRight(-velocidade);
-        if(controleAviao.y+1 <= controleAviao.maxY) aviao.rotation.y = THREE.MathUtils.degToRad(controleAviao.y++);
+        if(controleAviao.y+1 <= controleAviao.maxY)aviao.rotation.y = THREE.MathUtils.degToRad(controleAviao.y++);
+        camera.rotateY(y++/2000);
         if(controleAviao.z-1 >= controleAviao.minZ) aviao.rotation.z = THREE.MathUtils.degToRad(controleAviao.z--);
     },
     KeyD(){
         controle.moveRight(velocidade);
         if(controleAviao.y-1 >= controleAviao.minY) aviao.rotation.y = THREE.MathUtils.degToRad(controleAviao.y--);
+        camera.rotateY(y--/2000);
         if(controleAviao.z+1 <= controleAviao.maxZ) aviao.rotation.z = THREE.MathUtils.degToRad(controleAviao.z++);
     },
     ShiftLeft(){
         velocidade = 0.25;
     },
     KeyE(){
-        controle.getObject().position.y += 0.15;
-        if(controleAviao.x+1 <= controleAviao.maxX) aviao.rotation.x = THREE.MathUtils.degToRad(controleAviao.x++);
-        console.log(controleAviao.x);
+        controle.getObject().position.y += 0.05;
+        if(controleAviao.x+1 <= controleAviao.maxX){
+            aviao.rotation.x = THREE.MathUtils.degToRad(controleAviao.x++);
+            camera.rotateX(controleAviao.x/20000);
+        }
+
     },
     KeyQ(){
-        controle.getObject().position.y -= 0.15;
-        if(controleAviao.x-1 >= controleAviao.minX) aviao.rotation.x = THREE.MathUtils.degToRad(controleAviao.x--);
+        controle.getObject().position.y -= 0.05;
+        if(controleAviao.x-1 >= controleAviao.minX){
+            aviao.rotation.x = THREE.MathUtils.degToRad(controleAviao.x--);
+            camera.rotateX(-controleAviao.x/20000);
+        }
     }
 }
 
@@ -138,6 +146,7 @@ document.addEventListener('keydown', event=> teclasPressionadas.add(event.code))
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
     if(event.code === "ShiftLeft") velocidade = 0.15;
+    if (event.code === 'KeyD' || event.code === 'KeyA') y *= 0.5;
 });
 
 function movimentacao(){
