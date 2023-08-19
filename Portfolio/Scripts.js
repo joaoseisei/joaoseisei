@@ -112,14 +112,14 @@ let identificadorTeclas = {
     KeyA(){
         controle.moveRight(-velocidade);
         if(controleAviao.y+1 <= controleAviao.maxY) controleAviao.y++;
-        camera.rotateY(y++/2000);
         if(controleAviao.z-1 >= controleAviao.minZ) controleAviao.z--;
+        camera.rotateY(y++/2000);
     },
     KeyD(){
         controle.moveRight(velocidade);
         if(controleAviao.y-1 >= controleAviao.minY) controleAviao.y--
-        camera.rotateY(y--/2000);
         if(controleAviao.z+1 <= controleAviao.maxZ) controleAviao.z++
+        camera.rotateY(y--/2000);
     },
     ShiftLeft(){
         velocidade = 0.25;
@@ -169,21 +169,26 @@ function animador(){
 
 function estabilizador(){
 
-    if(controleAviao.x !== 90.00){
+    if(controleAviao.x !== 90){
         if(!(teclasPressionadas.has('KeyE') || teclasPressionadas.has('KeyQ'))){
-            if(controleAviao.x > 90)controleAviao.x -= 1;
+            if(controleAviao.x > 90) controleAviao.x -= 1;
             else controleAviao.x += 1;
-
-
-            console.log("nao pressionadas)");
         }
     }
 
     if(controleAviao.y !== 0){
-
+        if(!(teclasPressionadas.has('KeyA') || teclasPressionadas.has('KeyD'))){
+            if(controleAviao.y > 0) controleAviao.y -= 1;
+            else controleAviao.y += 1;
+        }
     }
 
-
+    if(controleAviao.z !== 180){
+        if(!(teclasPressionadas.has('KeyA') || teclasPressionadas.has('KeyD'))){
+            if(controleAviao.z > 180) controleAviao.z -= 1;
+            else controleAviao.z += 1;
+        }
+    }
 }
 
 //-------------------------------CHAO---------------------------------
