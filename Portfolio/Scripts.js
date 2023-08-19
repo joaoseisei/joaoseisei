@@ -87,8 +87,18 @@ const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let velocidade = 0.15;
-let y = 0;
 let x = 90;
+let y = 0;
+let z = 180;
+
+let controleAviao = {
+    z: 180,
+    x: 90,
+    y: 0,
+    minX: -90,
+    maxX: 90, aviao
+
+}
 let identificadorTeclas = {
     KeyW(){
         controle.moveForward(velocidade);
@@ -99,10 +109,12 @@ let identificadorTeclas = {
     KeyA(){
         controle.moveRight(-velocidade);
         aviao.rotation.y = THREE.MathUtils.degToRad(y++);
+        aviao.rotation.z = THREE.MathUtils.degToRad(z--);
     },
     KeyD(){
         controle.moveRight(velocidade);
         aviao.rotation.y = THREE.MathUtils.degToRad(y--);
+        aviao.rotation.z = THREE.MathUtils.degToRad(z++);
     },
     ShiftLeft(){
         velocidade = 0.25;
