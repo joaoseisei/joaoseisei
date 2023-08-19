@@ -1,0 +1,11 @@
+Model Information:
+* title:	Island Red Sky
+* source:	https://sketchfab.com/3d-models/island-red-sky-ffbb9179f9094f2c81d28dd9e6ec7ae9
+* author:	GremorySaiyan (https://sketchfab.com/GremorySaiyan)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Island Red Sky" (https://sketchfab.com/3d-models/island-red-sky-ffbb9179f9094f2c81d28dd9e6ec7ae9) by GremorySaiyan (https://sketchfab.com/GremorySaiyan) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

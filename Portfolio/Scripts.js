@@ -11,7 +11,10 @@ let cena, camera, renderizador, ceu, sol;
 
 function init(){
     cena = new THREE.Scene();
+
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+    camera.position.set(0, 10, 0);
+
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
     renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -142,7 +145,6 @@ let identificadorTeclas = {
     }
 }
 
-
 document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
@@ -194,30 +196,12 @@ function estabilizarAviao(){
     }
 }
 
-//-------------------------------CHAO---------------------------------
-const chao = new THREE.Mesh(
-    new THREE.PlaneGeometry(400, 400),
-    new THREE.MeshStandardMaterial({color : 0x008000})
-);
-chao.position.set(0,-2, 0);
-chao.rotation.x = -Math.PI / 2;
-chao.receiveShadow = true;
-cena.add(chao);
-//-------------------------------OBJETOS------------------------------
-function criarCubo(base, textura){
-    const texturaCubo = new THREE.TextureLoader().load(textura);
-    texturaCubo.colorSpace = THREE.SRGBColorSpace;
-    let cubo = new THREE.Mesh(
-        new THREE.BoxGeometry(base, base, base),
-        new THREE.MeshStandardMaterial({map: texturaCubo})
-    );
-    cubo.receiveShadow = true;
-    cubo.castShadow = true;
-    return cubo;
-}
-let cubo = criarCubo(10 , "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/crate.gif");
-cubo.position.set(8,-1,-6)
-cena.add(cubo);
+let ilha;
+GLTF.load('resources/Models/Ilha/scene.gltf', gltf =>{
+   ilha = gltf.scene;
+   sombrearModelo(ilha);
+   cena.add(ilha);
+});
 
 function sombrearModelo(obj){
     obj.traverse(child => {
