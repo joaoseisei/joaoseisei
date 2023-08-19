@@ -1,7 +1,7 @@
 import * as THREE from "https://unpkg.com/three@0.155.0/build/three.module.js";
+import {Sky} from "https://unpkg.com/three@0.155.0/examples/jsm/objects/Sky.js";
 import {GLTFLoader} from "https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js";
 import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/PointerLockControls.js";
-import {Sky} from "https://unpkg.com/three@0.155.0/examples/jsm/objects/Sky.js";
 
 console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
@@ -53,7 +53,7 @@ function initSky(){
         ceu.material.uniforms.sunPosition.value.copy(sol);
         cena.environment = geradorReflexao.fromScene(ceu).texture;
 
-        const luz = new THREE.DirectionalLight(0xffffff, 1);
+        const luz = new THREE.DirectionalLight(0xffffff, 1.5);
         luz.position.copy(sol);
 
         luz.castShadow = true;
@@ -69,7 +69,7 @@ function initSky(){
 
         cena.add(luz);
     }
-    updateSun(84, 0);
+    updateSun(80, 0);
 }
 
 const teclasPressionadas = new Set();
@@ -119,7 +119,7 @@ function movimentacao(){
 //-------------------------------CHAO---------------------------------
 const chao = new THREE.Mesh(
     new THREE.PlaneGeometry(400, 400),
-    new THREE.MeshStandardMaterial({color : 0xffffff})
+    new THREE.MeshStandardMaterial({color : 0x008000})
 );
 chao.position.set(0,-2, 0);
 chao.rotation.x = -Math.PI / 2;
@@ -133,6 +133,7 @@ function criarCubo(base, textura){
         new THREE.BoxGeometry(base, base, base),
         new THREE.MeshStandardMaterial({map: texturaCubo})
     );
+    cubo.receiveShadow = true;
     cubo.castShadow = true;
     return cubo;
 }
@@ -152,8 +153,6 @@ GLTF.load("resources/Models/scene.gltf",(gltf)=> {
     sombrearModelo(peixeGLTF);
     cena.add(peixeGLTF);
 });
-
-
 
 
 /**
