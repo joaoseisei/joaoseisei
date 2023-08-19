@@ -15,6 +15,7 @@ function init(){
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
     renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderizador.shadowMap.needsUpdate = true;
     document.body.appendChild(renderizador.domElement);
 
     atualizarProporcao();
@@ -51,8 +52,24 @@ function initSky(){
         sol.setFromSphericalCoords(1, phi, theta);
         ceu.material.uniforms.sunPosition.value.copy(sol);
         cena.environment = geradorReflexao.fromScene(ceu).texture;
+
+        const luz = new THREE.DirectionalLight(0xffffff, 1);
+        luz.position.copy(sol);
+
+        luz.castShadow = true;
+        luz.shadow.mapSize.width = 1024;
+        luz.shadow.mapSize.height = 1024;
+        luz.shadow.camera.near = 1;
+        luz.shadow.camera.far = 1000;
+
+        luz.shadow.camera.left = -500;
+        luz.shadow.camera.right = 500;
+        luz.shadow.camera.top = 500;
+        luz.shadow.camera.bottom = -500
+
+        cena.add(luz);
     }
-    updateSun(80, 0);
+    updateSun(84, 0);
 }
 
 const teclasPressionadas = new Set();
@@ -119,9 +136,10 @@ function criarCubo(base, textura){
     cubo.castShadow = true;
     return cubo;
 }
-let cubo = criarCubo(2, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/crate.gif");
+let cubo = criarCubo(10 , "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/crate.gif");
 cubo.position.set(8,-1,-6)
 cena.add(cubo);
+
 
 const GLTF = new GLTFLoader();
 
@@ -129,19 +147,14 @@ let peixeGLTF;
 GLTF.load("resources/Models/scene.gltf",(gltf)=> {
     peixeGLTF = gltf.scene;
     peixeGLTF.scale.set(0.5,0.5,0.5);
-    peixeGLTF.position.set(0,-1,0);
+    peixeGLTF.position.set(-10,-3,0);
     peixeGLTF.rotation.y = Math.PI / 2;
     sombrearModelo(peixeGLTF);
     cena.add(peixeGLTF);
 });
-//-------------------------------FUNÇÕES------------------------------
-/**
- * Gira um objeto.
- * @param obj Objeto a ser girado.
- */
-function girarOBJ(obj){
-    if(obj!=null) obj.rotation.y += 0.01;
-}
+
+
+
 
 /**
  * Percorre todos os filhos de um obj e sombreia eles.
@@ -162,10 +175,6 @@ function ativarLuz(objLuz){
     cena.add(linhasGuia);
 }
 
-
-/**
- * Anima a tela.
- */
 function animate(){
     renderizador.render(cena, camera);
     movimentacao();
