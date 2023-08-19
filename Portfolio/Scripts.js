@@ -87,18 +87,21 @@ const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let velocidade = 0.15;
-let x = 90;
-let y = 0;
-let z = 180;
 
 let controleAviao = {
     z: 180,
-    x: 90,
-    y: 0,
-    minX: -90,
-    maxX: 90, aviao
+    minZ: 150,
+    maxZ: 210,
 
+    y: 0,
+    minY: -35,
+    maxY: 35,
+
+    x: 90,
+    minX: 50,
+    maxX: 110
 }
+
 let identificadorTeclas = {
     KeyW(){
         controle.moveForward(velocidade);
@@ -108,24 +111,25 @@ let identificadorTeclas = {
     },
     KeyA(){
         controle.moveRight(-velocidade);
-        aviao.rotation.y = THREE.MathUtils.degToRad(y++);
-        aviao.rotation.z = THREE.MathUtils.degToRad(z--);
+        if(controleAviao.y+1 <= controleAviao.maxY) aviao.rotation.y = THREE.MathUtils.degToRad(controleAviao.y++);
+        if(controleAviao.z-1 >= controleAviao.minZ) aviao.rotation.z = THREE.MathUtils.degToRad(controleAviao.z--);
     },
     KeyD(){
         controle.moveRight(velocidade);
-        aviao.rotation.y = THREE.MathUtils.degToRad(y--);
-        aviao.rotation.z = THREE.MathUtils.degToRad(z++);
+        if(controleAviao.y-1 >= controleAviao.minY) aviao.rotation.y = THREE.MathUtils.degToRad(controleAviao.y--);
+        if(controleAviao.z+1 <= controleAviao.maxZ) aviao.rotation.z = THREE.MathUtils.degToRad(controleAviao.z++);
     },
     ShiftLeft(){
         velocidade = 0.25;
     },
     KeyE(){
         controle.getObject().position.y += 0.15;
-        aviao.rotation.x = THREE.MathUtils.degToRad(x++);
+        if(controleAviao.x+1 <= controleAviao.maxX) aviao.rotation.x = THREE.MathUtils.degToRad(controleAviao.x++);
+        console.log(controleAviao.x);
     },
     KeyQ(){
         controle.getObject().position.y -= 0.15;
-        aviao.rotation.x = THREE.MathUtils.degToRad(x--);
+        if(controleAviao.x-1 >= controleAviao.minX) aviao.rotation.x = THREE.MathUtils.degToRad(controleAviao.x--);
     }
 }
 
