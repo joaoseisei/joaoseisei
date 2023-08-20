@@ -85,12 +85,20 @@ GLTF.load("resources/Models/Aviao/scene.gltf", gltf => {
     sombrearModelo(aviao);
     camera.add(aviao);
 });
+let ilha;
+GLTF.load('resources/Models/Ilha/scene.gltf', gltf =>{
+    ilha = gltf.scene;
+    sombrearModelo(ilha);
+    cena.add(ilha);
+});
 
 const teclasPressionadas = new Set();
 const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let velocidade = 0.15;
+let y = 0;
+let x = 0;
 
 let controleAviao = {
     z: 180,
@@ -105,9 +113,6 @@ let controleAviao = {
     minX: 50,
     maxX: 110
 }
-
-let y = 0;
-let x = 0;
 
 let identificadorTeclas = {
 
@@ -195,13 +200,6 @@ function estabilizarAviao(){
         }
     }
 }
-
-let ilha;
-GLTF.load('resources/Models/Ilha/scene.gltf', gltf =>{
-   ilha = gltf.scene;
-   sombrearModelo(ilha);
-   cena.add(ilha);
-});
 
 function sombrearModelo(obj){
     obj.traverse(child => {
