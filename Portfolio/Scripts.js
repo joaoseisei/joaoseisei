@@ -97,8 +97,8 @@ const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let velocidade = 0.15;
-let y = 0;
-let x = 0;
+let cameraY = 0;
+let cameraX = 0;
 
 let controleAviao = {
     z: 180,
@@ -114,6 +114,14 @@ let controleAviao = {
     maxX: 110
 }
 
+let controleCamera = {
+    y: 0,
+
+    x: 0,
+    minX: -40,
+    maxX: 40
+}
+
 let identificadorTeclas = {
 
     KeyW(){
@@ -124,29 +132,28 @@ let identificadorTeclas = {
     },
     KeyA(){
         controle.moveRight(-velocidade);
-        camera.rotateY(y++/2000);
-        if(controleAviao.y+1 <= controleAviao.maxY) controleAviao.y++;
-        if(controleAviao.z-1 >= controleAviao.minZ) controleAviao.z--;
+        if(controleAviao.y+1 <= controleAviao.maxY) controleAviao.y++
+        if(controleAviao.z-1 >= controleAviao.minZ) controleAviao.z--
+        controleCamera.y++
     },
     KeyD(){
         controle.moveRight(velocidade);
-        camera.rotateY(y--/2000);
         if(controleAviao.y-1 >= controleAviao.minY) controleAviao.y--
         if(controleAviao.z+1 <= controleAviao.maxZ) controleAviao.z++
+        controleCamera.y--
     },
     ShiftLeft(){
         velocidade = 0.25;
     },
     KeyE(){
         controle.getObject().position.y += 0.05;
-        camera.rotateX(x++/10000);
-        if(controleAviao.x+1 <= controleAviao.maxX) controleAviao.x++;
-
+        if(controleAviao.x+1 <= controleAviao.maxX) controleAviao.x++
+        if(controleCamera.x+1 <=controleCamera.maxX) controleCamera.x++
     },
     KeyQ(){
         controle.getObject().position.y -= 0.05;
-        camera.rotateX(x--/10000);
-        if(controleAviao.x-1 >= controleAviao.minX) controleAviao.x--;
+        if(controleAviao.x-1 >= controleAviao.minX) controleAviao.x--
+        if(controleCamera.x-1 >= controleCamera.minX) controleCamera.x--
     }
 }
 
@@ -155,8 +162,8 @@ document.addEventListener('keydown', event=> teclasPressionadas.add(event.code))
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
     if(event.code === "ShiftLeft") velocidade = 0.15;
-    if(event.code === 'KeyD' || event.code === 'KeyA') y *= 0.5;
-    if(event.code === 'KeyE' || event.code === 'KeyQ') x *= 0.1;
+    if(event.code === 'KeyD' || event.code === 'KeyA') cameraY *= 0.5;
+    if(event.code === 'KeyE' || event.code === 'KeyQ') cameraX *= 0.1;
 });
 
 function movimentacao(){
@@ -165,8 +172,34 @@ function movimentacao(){
             if(identificadorTeclas[teclas] !== undefined) identificadorTeclas[teclas]();
         });
     }
-    estabilizarAviao();
     posicaoAviao();
+    estabilizarAviao();
+
+    posicaoCamera();
+    estabilizadorCamera();
+}
+
+function posicaoCamera(){
+    camera.rotation.set(THREE.MathUtils.degToRad(controleCamera.x),
+                        THREE.MathUtils.degToRad(controleCamera.y),
+                        0);
+}
+
+function estabilizadorCamera(){
+
+    if(controleCamera.x !== 0){
+        if(!(teclasPressionadas.has('KeyQ') || teclasPressionadas.has('KeyE'))){
+            if(controleCamera.x > 0) controleCamera.x -= 1;
+            else controleCamera.x += 1;
+        }
+    }
+
+    if(controleCamera.y !== 0){
+        if(teclasPressionadas.has('KeyQ') || teclasPressionadas.has('KeyE')){
+            if(controleCamera.y > 0) controleCamera.y -= 1;
+            else controleCamera.y += 1;
+        }
+    }
 }
 
 function posicaoAviao(){
@@ -199,6 +232,7 @@ function estabilizarAviao(){
             else controleAviao.z += 1;
         }
     }
+
 }
 
 function sombrearModelo(obj){
