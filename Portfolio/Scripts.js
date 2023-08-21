@@ -76,14 +76,14 @@ function initSky(){
 }
 
 const GLTF = new GLTFLoader();
-let aviao;
-GLTF.load("resources/Models/Aviao/scene.gltf", gltf => {
-    aviao = gltf.scene;
-    aviao.rotation.x = THREE.MathUtils.degToRad(85);
-    aviao.rotation.z = THREE.MathUtils.degToRad(180);
-    aviao.position.set(0,-.5,-1.5);
-    sombrearModelo(aviao);
-    camera.add(aviao);
+let phoenix;
+GLTF.load("resources/Models/Phoenix/scene.gltf", gltf => {
+    const escala = 0.001;
+    phoenix = gltf.scene;
+    phoenix.scale.set(escala, escala, escala);
+    phoenix.position.set(0,-.5,-1.5);
+    sombrearModelo(phoenix);
+    camera.add(phoenix);
 });
 let ilha;
 GLTF.load('resources/Models/Ilha/scene.gltf', gltf =>{
@@ -98,18 +98,18 @@ cena.add(controle.getObject());
 
 let velocidade = 0.15;
 
-let controleAviao = {
-    x: 90,
-    minX: 50,
-    maxX: 110,
+let controlePhoenix = {
+    x: -10,
+    minX: -80,
+    maxX: 30,
 
-    y: 0,
-    minY: -35,
-    maxY: 35,
+    y: 90,
+    minY: 45,
+    maxY: 135,
 
-    z: 180,
-    minZ: 150,
-    maxZ: 210
+    z: 0,
+    minZ: -10,
+    maxZ: 10
 }
 
 let controleCamera = {
@@ -126,14 +126,12 @@ let identificadorTeclas = {
     },
     KeyA(){
         controle.moveRight(-velocidade);
-        if(controleAviao.y+1 <= controleAviao.maxY) controleAviao.y++
-        if(controleAviao.z-1 >= controleAviao.minZ) controleAviao.z--
+        if(controlePhoenix.y+1 <= controlePhoenix.maxY) controlePhoenix.y++
         controleCamera.y++
     },
     KeyD(){
         controle.moveRight(velocidade);
-        if(controleAviao.y-1 >= controleAviao.minY) controleAviao.y--
-        if(controleAviao.z+1 <= controleAviao.maxZ) controleAviao.z++
+        if(controlePhoenix.y-1 >= controlePhoenix.minY) controlePhoenix.y--
         controleCamera.y--
     },
     ShiftLeft(){
@@ -141,12 +139,11 @@ let identificadorTeclas = {
     },
     KeyE(){
         controle.getObject().position.y += 0.05;
-        if(controleAviao.x+1 <= controleAviao.maxX) controleAviao.x++
-        console.log(controleCamera.y , controleAviao.z, " / ", controleCamera.y);
+        if(controlePhoenix.x+1 <= controlePhoenix.maxX) controlePhoenix.x++
     },
     KeyQ(){
         controle.getObject().position.y -= 0.05;
-        if(controleAviao.x-1 >= controleAviao.minX) controleAviao.x--
+        if(controlePhoenix.x-1 >= controlePhoenix.minX) controlePhoenix.x--
     }
 }
 
@@ -165,45 +162,20 @@ function movimentacao(){
     }
     posicaoCamera();
 
-    estabilizarAviao();
-    posicaoAviao();
+
+    posicaoPhoenix();
 }
 
 function posicaoCamera(){
     camera.rotation.y = THREE.MathUtils.degToRad(controleCamera.y);
 }
 
-function posicaoAviao(){
-    if(aviao!==undefined){
-        aviao.rotation.set(THREE.MathUtils.degToRad(controleAviao.x),
-                           THREE.MathUtils.degToRad(controleAviao.y),
-                           THREE.MathUtils.degToRad(controleAviao.z));
+function posicaoPhoenix(){
+    if(phoenix!==undefined){
+        phoenix.rotation.x = THREE.MathUtils.degToRad(controlePhoenix.x);
+        phoenix.rotation.y = THREE.MathUtils.degToRad(controlePhoenix.y);
+        phoenix.rotation.z = THREE.MathUtils.degToRad(controlePhoenix.z);
     }
-}
-
-function estabilizarAviao(){
-
-    if(controleAviao.x !== 90){
-        if(!(teclasPressionadas.has('KeyE') || teclasPressionadas.has('KeyQ'))){
-            if(controleAviao.x > 90) controleAviao.x -= 1;
-            else controleAviao.x += 1;
-        }
-    }
-
-    if(controleAviao.y !== 0){
-        if(!(teclasPressionadas.has('KeyA') || teclasPressionadas.has('KeyD'))){
-            if(controleAviao.y > 0) controleAviao.y -= 1;
-            else controleAviao.y += 1;
-        }
-    }
-
-    if(controleAviao.z !== 180){
-        if(!(teclasPressionadas.has('KeyA') || teclasPressionadas.has('KeyD'))){
-            if(controleAviao.z > 180) controleAviao.z -= 1;
-            else controleAviao.z += 1;
-        }
-    }
-
 }
 
 function sombrearModelo(obj){
