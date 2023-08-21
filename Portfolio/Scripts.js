@@ -13,7 +13,7 @@ function init(){
     cena = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 10, 0);
+    camera.position.set(0, 30, 0);
 
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
@@ -97,29 +97,23 @@ const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let velocidade = 0.15;
-let cameraY = 0;
-let cameraX = 0;
 
 let controleAviao = {
-    z: 180,
-    minZ: 150,
-    maxZ: 210,
+    x: 90,
+    minX: 50,
+    maxX: 110,
 
     y: 0,
     minY: -35,
     maxY: 35,
 
-    x: 90,
-    minX: 50,
-    maxX: 110
+    z: 180,
+    minZ: 150,
+    maxZ: 210
 }
 
 let controleCamera = {
-    y: 0,
-
-    x: 0,
-    minX: -40,
-    maxX: 40
+    y: 0
 }
 
 let identificadorTeclas = {
@@ -148,12 +142,11 @@ let identificadorTeclas = {
     KeyE(){
         controle.getObject().position.y += 0.05;
         if(controleAviao.x+1 <= controleAviao.maxX) controleAviao.x++
-        if(controleCamera.x+1 <=controleCamera.maxX) controleCamera.x++
+        console.log(controleCamera.y , controleAviao.z, " / ", controleCamera.y);
     },
     KeyQ(){
         controle.getObject().position.y -= 0.05;
         if(controleAviao.x-1 >= controleAviao.minX) controleAviao.x--
-        if(controleCamera.x-1 >= controleCamera.minX) controleCamera.x--
     }
 }
 
@@ -162,8 +155,6 @@ document.addEventListener('keydown', event=> teclasPressionadas.add(event.code))
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
     if(event.code === "ShiftLeft") velocidade = 0.15;
-    if(event.code === 'KeyD' || event.code === 'KeyA') cameraY *= 0.5;
-    if(event.code === 'KeyE' || event.code === 'KeyQ') cameraX *= 0.1;
 });
 
 function movimentacao(){
@@ -172,34 +163,14 @@ function movimentacao(){
             if(identificadorTeclas[teclas] !== undefined) identificadorTeclas[teclas]();
         });
     }
-    posicaoAviao();
-    estabilizarAviao();
-
     posicaoCamera();
-    estabilizadorCamera();
+
+    estabilizarAviao();
+    posicaoAviao();
 }
 
 function posicaoCamera(){
-    camera.rotation.set(THREE.MathUtils.degToRad(controleCamera.x),
-                        THREE.MathUtils.degToRad(controleCamera.y),
-                        0);
-}
-
-function estabilizadorCamera(){
-
-    if(controleCamera.x !== 0){
-        if(!(teclasPressionadas.has('KeyQ') || teclasPressionadas.has('KeyE'))){
-            if(controleCamera.x > 0) controleCamera.x -= 1;
-            else controleCamera.x += 1;
-        }
-    }
-
-    if(controleCamera.y !== 0){
-        if(teclasPressionadas.has('KeyQ') || teclasPressionadas.has('KeyE')){
-            if(controleCamera.y > 0) controleCamera.y -= 1;
-            else controleCamera.y += 1;
-        }
-    }
+    camera.rotation.y = THREE.MathUtils.degToRad(controleCamera.y);
 }
 
 function posicaoAviao(){
