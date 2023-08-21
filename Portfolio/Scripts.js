@@ -13,7 +13,7 @@ function init(){
     cena = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 30, 0);
+    camera.position.set(0, 40, 0);
 
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
@@ -115,7 +115,6 @@ let controlePhoenix = {
 let controleCamera = {
     y: 0
 }
-
 let identificadorTeclas = {
 
     KeyW(){
@@ -162,12 +161,25 @@ function movimentacao(){
     }
     posicaoCamera();
 
-
     posicaoPhoenix();
+    estabilizarPhoenix();
 }
 
 function posicaoCamera(){
     camera.rotation.y = THREE.MathUtils.degToRad(controleCamera.y);
+}
+
+/**
+ * TODO fazer a movimentaçao x sem bugs
+ */
+function estabilizarCamera(){
+
+    if(controleCamera.x !== 0){
+        if(!(teclasPressionadas.has('KeyI') || teclasPressionadas.has('KeyO'))){
+            if(controleCamera.x > 0) controleCamera.x -= 1;
+            else controleCamera.x += 1;
+        }
+    }
 }
 
 function posicaoPhoenix(){
@@ -175,6 +187,23 @@ function posicaoPhoenix(){
         phoenix.rotation.x = THREE.MathUtils.degToRad(controlePhoenix.x);
         phoenix.rotation.y = THREE.MathUtils.degToRad(controlePhoenix.y);
         phoenix.rotation.z = THREE.MathUtils.degToRad(controlePhoenix.z);
+    }
+}
+
+function estabilizarPhoenix(){
+
+    if(controlePhoenix.x !== -10){
+        if(!(teclasPressionadas.has('KeyE') || teclasPressionadas.has('KeyQ'))){
+            if(controlePhoenix.x > -10) controlePhoenix.x -= 1;
+            else controlePhoenix.x += 1;
+        }
+    }
+
+    if(controlePhoenix.y !== 90){
+        if(!(teclasPressionadas.has('KeyA') || teclasPressionadas.has('KeyD'))){
+            if(controlePhoenix.y > 90) controlePhoenix.y -= 1;
+            else controlePhoenix.y += 1;
+        }
     }
 }
 
