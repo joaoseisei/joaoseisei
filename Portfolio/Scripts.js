@@ -87,19 +87,6 @@ GLTF.load("resources/Models/Phoenix/scene.gltf", gltf => {
     phoenix.add(esqueleto);
 
     camera.add(phoenix);
-
-    const animacoes = gltf.animations;
-    mixer = new THREE.AnimationMixer(phoenix);
-    let voo = mixer.clipAction(animacoes[0]);
-    let acoes = [voo];
-    
-});
-
-let ilha;
-GLTF.load('resources/Models/Ilha/scene.gltf', gltf =>{
-    ilha = gltf.scene;
-    sombrearModelo(ilha);
-    //cena.add(ilha);
 });
 
 const teclasPressionadas = new Set();
@@ -183,9 +170,9 @@ let posicoes = {
 
     posicaoPhoenix(){
         if(phoenix!==undefined){
-            phoenix.rotation.x = THREE.MathUtils.degToRad(controlePhoenix.x);
-            phoenix.rotation.y = THREE.MathUtils.degToRad(controlePhoenix.y);
-            phoenix.rotation.z = THREE.MathUtils.degToRad(controlePhoenix.z);
+            phoenix.rotation.set(THREE.MathUtils.degToRad(controlePhoenix.x),
+                                 THREE.MathUtils.degToRad(controlePhoenix.y),
+                                 THREE.MathUtils.degToRad(controlePhoenix.z))
         }
     }
 }
@@ -221,6 +208,7 @@ function hasTecla(tecla) {
 function mostrarEsqueleto(){
     if(esqueleto!==undefined)esqueleto.visible = true;
 }mostrarEsqueleto();
+
 function mostrarPhoenix(){
     if(phoenix!==undefined)phoenix.visible = true;
 }mostrarPhoenix();
