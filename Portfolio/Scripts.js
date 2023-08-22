@@ -13,7 +13,6 @@ function init(){
     cena = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 40, 0);
 
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
@@ -76,20 +75,31 @@ function initSky(){
 }
 
 const GLTF = new GLTFLoader();
-let phoenix;
+let phoenix, esqueleto, mixer;
 GLTF.load("resources/Models/Phoenix/scene.gltf", gltf => {
     const escala = 0.001;
     phoenix = gltf.scene;
     phoenix.scale.set(escala, escala, escala);
     phoenix.position.set(0,-.5,-1.5);
     sombrearModelo(phoenix);
+
+    esqueleto = new THREE.SkeletonHelper(phoenix);
+    phoenix.add(esqueleto);
+
     camera.add(phoenix);
+
+    const animacoes = gltf.animations;
+    mixer = new THREE.AnimationMixer(phoenix);
+    let voo = mixer.clipAction(animacoes[0]);
+    let acoes = [voo];
+    
 });
+
 let ilha;
 GLTF.load('resources/Models/Ilha/scene.gltf', gltf =>{
     ilha = gltf.scene;
     sombrearModelo(ilha);
-    cena.add(ilha);
+    //cena.add(ilha);
 });
 
 const teclasPressionadas = new Set();
@@ -159,53 +169,61 @@ function movimentacao(){
             if(identificadorTeclas[teclas] !== undefined) identificadorTeclas[teclas]();
         });
     }
-    posicaoCamera();
+    posicoes.posicaoCamera();
+    posicoes.posicaoPhoenix();
 
-    posicaoPhoenix();
-    estabilizarPhoenix();
+    estabilizadores.estabilizarPhoenix();
 }
 
-function posicaoCamera(){
-    camera.rotation.y = THREE.MathUtils.degToRad(controleCamera.y);
-}
+let posicoes = {
 
-/**
- * TODO fazer a movimentaçao x sem bugs
- */
-function estabilizarCamera(){
+    posicaoCamera(){
+        camera.rotation.y = THREE.MathUtils.degToRad(controleCamera.y);
+    },
 
-    if(controleCamera.x !== 0){
-        if(!(teclasPressionadas.has('KeyI') || teclasPressionadas.has('KeyO'))){
-            if(controleCamera.x > 0) controleCamera.x -= 1;
-            else controleCamera.x += 1;
+    posicaoPhoenix(){
+        if(phoenix!==undefined){
+            phoenix.rotation.x = THREE.MathUtils.degToRad(controlePhoenix.x);
+            phoenix.rotation.y = THREE.MathUtils.degToRad(controlePhoenix.y);
+            phoenix.rotation.z = THREE.MathUtils.degToRad(controlePhoenix.z);
         }
     }
 }
 
-function posicaoPhoenix(){
-    if(phoenix!==undefined){
-        phoenix.rotation.x = THREE.MathUtils.degToRad(controlePhoenix.x);
-        phoenix.rotation.y = THREE.MathUtils.degToRad(controlePhoenix.y);
-        phoenix.rotation.z = THREE.MathUtils.degToRad(controlePhoenix.z);
+let estabilizadores = {
+
+    estabilizar(pontoMedio, atributo){
+        return (atributo > pontoMedio) ? -1 : 1
+    },
+
+    estabilizarCamera(){
+
+        if (controleCamera.x !== 0 && !hasTecla('KeyI') && !hasTecla('KeyO')){
+            controleCamera.x += this.estabilizar(0, controleCamera.x);
+        }
+    },
+
+    estabilizarPhoenix(){
+        if (controlePhoenix.x !== -10 && !hasTecla('KeyE') && !hasTecla('KeyQ')){
+            controlePhoenix.x += this.estabilizar(-10, controlePhoenix.x);
+        }
+
+        if (controlePhoenix.y !== 90 && !hasTecla('KeyA') && !hasTecla('KeyD')){
+            controlePhoenix.y += this.estabilizar(90, controlePhoenix.y);
+        }
     }
 }
 
-function estabilizarPhoenix(){
-
-    if(controlePhoenix.x !== -10){
-        if(!(teclasPressionadas.has('KeyE') || teclasPressionadas.has('KeyQ'))){
-            if(controlePhoenix.x > -10) controlePhoenix.x -= 1;
-            else controlePhoenix.x += 1;
-        }
-    }
-
-    if(controlePhoenix.y !== 90){
-        if(!(teclasPressionadas.has('KeyA') || teclasPressionadas.has('KeyD'))){
-            if(controlePhoenix.y > 90) controlePhoenix.y -= 1;
-            else controlePhoenix.y += 1;
-        }
-    }
+function hasTecla(tecla) {
+    return teclasPressionadas.has(tecla);
 }
+
+function mostrarEsqueleto(){
+    if(esqueleto!==undefined)esqueleto.visible = true;
+}mostrarEsqueleto();
+function mostrarPhoenix(){
+    if(phoenix!==undefined)phoenix.visible = true;
+}mostrarPhoenix();
 
 function sombrearModelo(obj){
     obj.traverse(child => {
