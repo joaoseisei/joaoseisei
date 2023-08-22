@@ -1,5 +1,6 @@
 import * as THREE from "https://unpkg.com/three@0.155.0/build/three.module.js";
 import {Sky} from "https://unpkg.com/three@0.155.0/examples/jsm/objects/Sky.js";
+import {Water} from "https://unpkg.com/three@0.155.0/examples/jsm/objects/Water.js";
 import {GLTFLoader} from "https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js";
 import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/PointerLockControls.js";
 
@@ -7,12 +8,14 @@ console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 
 let dimensoesTela = {largura: null, altura: null}
-let cena, camera, renderizador, ceu, sol;
+let cena, camera, renderizador,
+    ceu, sol, agua, planoAgua;
 
 function init(){
     cena = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+    camera.position.set(0, 15, 0)
 
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
@@ -22,6 +25,7 @@ function init(){
 
     atualizarProporcao();
     initSky();
+    initWater();
 }init();
 
 function atualizarProporcao(){
@@ -61,17 +65,44 @@ function initSky(){
         luz.castShadow = true;
         luz.shadow.mapSize.width = 1024;
         luz.shadow.mapSize.height = 1024;
-        luz.shadow.camera.near = 1;
-        luz.shadow.camera.far = 1000;
 
-        luz.shadow.camera.left = -500;
-        luz.shadow.camera.right = 500;
-        luz.shadow.camera.top = 500;
-        luz.shadow.camera.bottom = -500
+        let configuracaoLuz = luz.shadow.camera;
+        configuracaoLuz.near = 1;
+        configuracaoLuz.far = 1000;
+        configuracaoLuz.left = -500;
+        configuracaoLuz.right = 500;
+        configuracaoLuz.top = 500;
+        configuracaoLuz.bottom = -500
 
         cena.add(luz);
     }
-    updateSun(80, 0);
+    updateSun(89, 180);
+}
+
+function initWater(){
+    planoAgua = new THREE.PlaneGeometry(4000, 4000);
+    agua = new Water(planoAgua, {
+            textureWidth: 512,
+            textureHeight: 512,
+            sunDirection: new THREE.Vector3(),
+            sunColor: 0xffffff,
+            waterColor: 0x001e0f,
+            distortionScale: camera.position.y,
+
+            waterNormals: new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg',
+                function (textura) {textura.wrapS = textura.wrapT = THREE.RepeatWrapping;}
+            )
+        }
+    );
+
+    agua.rotation.x =  THREE.MathUtils.degToRad(-90);
+    cena.add(agua);
+}
+
+function uptadeDistorcao(){
+    agua.material.uniforms.time.value += 1/60;
+    agua.material.uniforms.distortionScale.value = camera.position.y;
+    agua.material.uniformsNeedUpdate = true;
 }
 
 const GLTF = new GLTFLoader();
@@ -184,7 +215,6 @@ let estabilizadores = {
     },
 
     estabilizarCamera(){
-
         if (controleCamera.x !== 0 && !hasTecla('KeyI') && !hasTecla('KeyO')){
             controleCamera.x += this.estabilizar(0, controleCamera.x);
         }
@@ -205,13 +235,10 @@ function hasTecla(tecla) {
     return teclasPressionadas.has(tecla);
 }
 
-function mostrarEsqueleto(){
-    if(esqueleto!==undefined)esqueleto.visible = true;
-}mostrarEsqueleto();
-
-function mostrarPhoenix(){
-    if(phoenix!==undefined)phoenix.visible = true;
-}mostrarPhoenix();
+function mostrarObj(Obj){
+    if(Obj !== undefined) Obj.visible = true;
+}
+mostrarObj(phoenix);
 
 function sombrearModelo(obj){
     obj.traverse(child => {
@@ -222,5 +249,6 @@ function sombrearModelo(obj){
 function animate(){
     renderizador.render(cena, camera);
     movimentacao();
+    uptadeDistorcao();
     requestAnimationFrame(animate);
 }animate();
