@@ -18,7 +18,7 @@ function init(){
     cena = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 2, 0)
+    camera.position.set(0, 10, 0)
 
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
@@ -139,13 +139,13 @@ function updateDistorcao(){
 const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
-let velocidade = 0.15;
 let teclasPressionadas = new Set();
 document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
     if(event.code === "ShiftLeft") velocidade = 0.15;
+    if(event.code === "KeyQ") gravidade.resetarGravidade();
 });
 
 /**
@@ -187,6 +187,23 @@ let controles = {
 
 }
 
+let velocidade = 0.15;
+
+let gravidade = {
+    velocidade: 1,
+    velocidadeMax: 10,
+
+    resetarGravidade(){
+        this.velocidade = 1;
+    },
+    incrementarVelocidade(){
+        if(this.velocidade+1 <= this.velocidadeMax) this.velocidade += 0.01;
+    },
+    camera(direcao){
+        camera.position.y += direcao * this.velocidade;
+    }
+}
+
 let identificadorTeclas = {
 
     KeyW(){
@@ -209,13 +226,15 @@ let identificadorTeclas = {
         velocidade = 0.25;
     },
     KeyE(){
-        if(camera.position.y < controles.camera.maxY) camera.position.y += 0.05;
+        if(camera.position.y < controles.camera.maxY) gravidade.camera(+0.05);
         if(controles.phoenix.x+1 <= controles.phoenix.maxX) controles.phoenix.x++
     },
     KeyQ(){
         if(camera.position.y >= controles.camera.minY){
-            camera.position.y -= 0.05;
             if(controles.phoenix.x-1 >= controles.phoenix.minX) controles.phoenix.x--
+
+            camera.position.y > 2 ? gravidade.incrementarVelocidade() : gravidade.resetarGravidade();
+            gravidade.camera(-0.05);
         }
     }
 
@@ -257,8 +276,8 @@ let estabilizadores = {
         if (controles.phoenix.y !== 90 && !(hasTecla('KeyA') || hasTecla('KeyD'))){
             controles.phoenix.y += this.estabilizar(90, controles.phoenix.y);
         }
-        if(camera.position.y <= controles.camera.minY && controles.phoenix.x !== -10) {
-            controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x)*10;
+        if(camera.position.y < controles.camera.minY && controles.phoenix.x !== -10) {
+            controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
         }
     }
 
