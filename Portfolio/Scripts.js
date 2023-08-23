@@ -18,7 +18,7 @@ function init(){
     cena = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 15, 0)
+    camera.position.set(0, 2, 0)
 
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
@@ -180,7 +180,9 @@ let controles = {
     },
 
     camera: {
-        y: 0
+        y: 0,
+        minY: 0.6,
+        maxY: 100,
     }
 
 }
@@ -207,12 +209,14 @@ let identificadorTeclas = {
         velocidade = 0.25;
     },
     KeyE(){
-        controle.getObject().position.y += 0.05;
+        if(camera.position.y < controles.camera.maxY) camera.position.y += 0.05;
         if(controles.phoenix.x+1 <= controles.phoenix.maxX) controles.phoenix.x++
     },
     KeyQ(){
-        controle.getObject().position.y -= 0.05;
-        if(controles.phoenix.x-1 >= controles.phoenix.minX) controles.phoenix.x--
+        if(camera.position.y >= controles.camera.minY){
+            camera.position.y -= 0.05;
+            if(controles.phoenix.x-1 >= controles.phoenix.minX) controles.phoenix.x--
+        }
     }
 
 }
@@ -246,12 +250,15 @@ let estabilizadores = {
     },
 
     estabilizarPhoenix(){
-        if (controles.phoenix.x !== -10 && !hasTecla('KeyE') && !hasTecla('KeyQ')){
+        if (controles.phoenix.x !== -10 && !(hasTecla('KeyE') || hasTecla('KeyQ'))){
             controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
         }
 
-        if (controles.phoenix.y !== 90 && !hasTecla('KeyA') && !hasTecla('KeyD')){
+        if (controles.phoenix.y !== 90 && !(hasTecla('KeyA') || hasTecla('KeyD'))){
             controles.phoenix.y += this.estabilizar(90, controles.phoenix.y);
+        }
+        if(camera.position.y <= controles.camera.minY && controles.phoenix.x !== -10) {
+            controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x)*10;
         }
     }
 
