@@ -265,7 +265,6 @@ let posicoes = {
     }
 
 }
-let hasTecla = (tecla) => teclasPressionadas.has(tecla);
 
 let estabilizadores = {
 
@@ -284,8 +283,9 @@ let estabilizadores = {
 
     estabilizarPhoenix(){
         if(this.isEstavel(controles.phoenix.x, -10)){
-            if(this.isTeclaPressionada(['KeyE', 'KeyQ'])) controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
-            if(camera.position.y < controles.camera.minY) controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
+            if(camera.position.y < controles.camera.minY || this.isTeclaPressionada(['KeyE', 'KeyQ'])) {
+                controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
+            }
         }
 
         if(this.isEstavel(controles.phoenix.y, 90) && this.isTeclaPressionada(['KeyA', 'KeyD'])){
@@ -298,7 +298,6 @@ let estabilizadores = {
 function mostrarObj(Obj){
     if(Obj !== undefined) Obj.visible = true;
 }
-mostrarObj(phoenix);
 
 function sombrearModelo(obj){
     obj.traverse(child => {
