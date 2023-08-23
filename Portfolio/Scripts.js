@@ -165,9 +165,9 @@ function movimentacao(){
 
 let controles = {
 
-    verificadorMax: (ValAtual, ValMax) => ValAtual+1 <= ValMax ,
+    verificadorMax: (ValAtual, ValMax) => ValAtual+1 <= ValMax,
 
-    verificadorMin: (ValAtual, ValMin) => ValAtual-1 >= ValMin ,
+    verificadorMin: (ValAtual, ValMin) => ValAtual-1 >= ValMin,
 
     phoenix: {
         x: -10,
@@ -269,26 +269,27 @@ let hasTecla = (tecla) => teclasPressionadas.has(tecla);
 
 let estabilizadores = {
 
-    estabilizar(pontoMedio, atributo){
-        return (atributo > pontoMedio) ? -1 : 1
-    },
+    estabilizar: (pontoMedio, atributo) => atributo > pontoMedio ? -1 : 1,
+
+    isEstavel: (obj, pontEquilibrio) => obj !== pontEquilibrio,
+
+    isTeclaPressionada: (teclas) => !teclas.some(tecla => Array.from(teclasPressionadas).includes(tecla)),
 
     estabilizarCamera(){
-        if (controles.camera.x !== 0 && !hasTecla('KeyI') && !hasTecla('KeyO')){
+        this.isTeclaPressionada(['KeyI', 'KeyO'])
+        if(this.isEstavel(controles.camera.x, 0) && this.isTeclaPressionada(['KeyI', 'KeyO'])){
             controles.camera.x += this.estabilizar(0, controles.camera.x);
         }
     },
 
     estabilizarPhoenix(){
-        if (controles.phoenix.x !== -10 && !(hasTecla('KeyE') || hasTecla('KeyQ'))){
-            controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
+        if(this.isEstavel(controles.phoenix.x, -10)){
+            if(this.isTeclaPressionada(['KeyE', 'KeyQ'])) controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
+            if(camera.position.y < controles.camera.minY) controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
         }
 
-        if (controles.phoenix.y !== 90 && !(hasTecla('KeyA') || hasTecla('KeyD'))){
+        if(this.isEstavel(controles.phoenix.y, 90) && this.isTeclaPressionada(['KeyA', 'KeyD'])){
             controles.phoenix.y += this.estabilizar(90, controles.phoenix.y);
-        }
-        if(camera.position.y < controles.camera.minY && controles.phoenix.x !== -10) {
-            controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
         }
     }
 
