@@ -7,9 +7,12 @@ import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/
 console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 
+const GLTF = new GLTFLoader();
+
 let dimensoesTela = {largura: null, altura: null}
-let cena, camera, renderizador,
-    ceu, sol, agua, planoAgua;
+let cena, camera, renderizador
+let ceu, sol, agua, planoAgua;
+let phoenix, esqueleto, mixer;
 
 function init(){
     cena = new THREE.Scene();
@@ -20,23 +23,14 @@ function init(){
     renderizador = new THREE.WebGLRenderer();
     renderizador.shadowMap.enabled = true;
     renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderizador.shadowMap.needsUpdate = true;
     document.body.appendChild(renderizador.domElement);
 
-    atualizarProporcao();
+    updateProporcao();
+
     initSky();
     initWater();
+    initModelos();
 }init();
-
-function atualizarProporcao(){
-    dimensoesTela.larguraTela = window.innerWidth;
-    dimensoesTela.alturaTela = window.innerHeight;
-
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderizador.setSize(window.innerWidth, window.innerHeight);
-}
-window.addEventListener("resize", atualizarProporcao);
 
 function initSky(){
     sol = new THREE.Vector3();
@@ -50,7 +44,7 @@ function initSky(){
     ceuPropriedades.mieCoefficient.value = 0.005;
     ceuPropriedades.mieDirectionalG.value = 0.9999;
 
-    function updateSun(a, b) {
+    function updateSol(a, b) {
         const geradorReflexao = new THREE.PMREMGenerator(renderizador);
         const phi = THREE.MathUtils.degToRad(a);
         const theta = THREE.MathUtils.degToRad(b);
@@ -59,6 +53,8 @@ function initSky(){
         ceu.material.uniforms.sunPosition.value.copy(sol);
         cena.environment = geradorReflexao.fromScene(ceu).texture;
 
+    }
+    function updateLuz(){
         const luz = new THREE.DirectionalLight(0xffffff, 1.5);
         luz.position.copy(sol);
 
@@ -66,17 +62,19 @@ function initSky(){
         luz.shadow.mapSize.width = 1024;
         luz.shadow.mapSize.height = 1024;
 
-        let configuracaoLuz = luz.shadow.camera;
-        configuracaoLuz.near = 1;
-        configuracaoLuz.far = 1000;
-        configuracaoLuz.left = -500;
-        configuracaoLuz.right = 500;
-        configuracaoLuz.top = 500;
-        configuracaoLuz.bottom = -500
+        let configLuz = luz.shadow.camera;
+        configLuz.near = 1;
+        configLuz.far = 1000;
+        configLuz.left = -500;
+        configLuz.right = 500;
+        configLuz.top = 500;
+        configLuz.bottom = -500
 
         cena.add(luz);
     }
-    updateSun(89, 180);
+
+    updateSol(89, 180);
+    updateLuz();
 }
 
 function initWater(){
@@ -99,81 +97,50 @@ function initWater(){
     cena.add(agua);
 }
 
-function uptadeDistorcao(){
-    agua.material.uniforms.time.value += 1/60;
+function initModelos(){
+
+    GLTF.load("resources/Models/Phoenix/scene.gltf", gltf => {
+        const escala = 0.001;
+        phoenix = gltf.scene;
+        phoenix.scale.set(escala, escala, escala);
+        phoenix.position.set(0,-.5,-1.5);
+        sombrearModelo(phoenix);
+
+        esqueleto = new THREE.SkeletonHelper(phoenix);
+        phoenix.add(esqueleto);
+
+        camera.add(phoenix);
+    });
+
+}
+
+/**
+ * Atualiza a proporção da tela.
+ */
+function updateProporcao(){
+    dimensoesTela.larguraTela = window.innerWidth;
+    dimensoesTela.alturaTela = window.innerHeight;
+
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderizador.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener("resize", updateProporcao);
+
+/**
+ * Atualiza a reflexão da água e anima a mesma.
+ */
+function updateDistorcao(){
+    agua.material.uniforms.time.value += 1/80;
     agua.material.uniforms.distortionScale.value = camera.position.y;
     agua.material.uniformsNeedUpdate = true;
 }
 
-const GLTF = new GLTFLoader();
-let phoenix, esqueleto, mixer;
-GLTF.load("resources/Models/Phoenix/scene.gltf", gltf => {
-    const escala = 0.001;
-    phoenix = gltf.scene;
-    phoenix.scale.set(escala, escala, escala);
-    phoenix.position.set(0,-.5,-1.5);
-    sombrearModelo(phoenix);
-
-    esqueleto = new THREE.SkeletonHelper(phoenix);
-    phoenix.add(esqueleto);
-
-    camera.add(phoenix);
-});
-
-const teclasPressionadas = new Set();
 const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let velocidade = 0.15;
-
-let controlePhoenix = {
-    x: -10,
-    minX: -80,
-    maxX: 30,
-
-    y: 90,
-    minY: 45,
-    maxY: 135,
-
-    z: 0,
-    minZ: -10,
-    maxZ: 10
-}
-
-let controleCamera = {
-    y: 0
-}
-let identificadorTeclas = {
-
-    KeyW(){
-        controle.moveForward(velocidade);
-    },
-    KeyS(){
-        controle.moveForward(-velocidade);
-    },
-    KeyA(){
-        controle.moveRight(-velocidade);
-        if(controlePhoenix.y+1 <= controlePhoenix.maxY) controlePhoenix.y++
-        controleCamera.y++
-    },
-    KeyD(){
-        controle.moveRight(velocidade);
-        if(controlePhoenix.y-1 >= controlePhoenix.minY) controlePhoenix.y--
-        controleCamera.y--
-    },
-    ShiftLeft(){
-        velocidade = 0.25;
-    },
-    KeyE(){
-        controle.getObject().position.y += 0.05;
-        if(controlePhoenix.x+1 <= controlePhoenix.maxX) controlePhoenix.x++
-    },
-    KeyQ(){
-        controle.getObject().position.y -= 0.05;
-        if(controlePhoenix.x-1 >= controlePhoenix.minX) controlePhoenix.x--
-    }
-}
-
+let teclasPressionadas = new Set();
 document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
@@ -181,6 +148,9 @@ document.addEventListener('keyup', event => {
     if(event.code === "ShiftLeft") velocidade = 0.15;
 });
 
+/**
+ * Movimenta a camera nos eixos XYZ e anima o obj Phoenix.
+ */
 function movimentacao(){
     if(teclasPressionadas.size !== 0){
         teclasPressionadas.forEach(teclas => {
@@ -193,19 +163,74 @@ function movimentacao(){
     estabilizadores.estabilizarPhoenix();
 }
 
+let controles = {
+
+    phoenix: {
+        x: -10,
+        minX: -80,
+        maxX: 30,
+
+        y: 90,
+        minY: 45,
+        maxY: 135,
+
+        z: 0,
+        minZ: -10,
+        maxZ: 10
+    },
+
+    camera: {
+        y: 0
+    }
+
+}
+
+let identificadorTeclas = {
+
+    KeyW(){
+        controle.moveForward(velocidade);
+    },
+    KeyS(){
+        controle.moveForward(-velocidade);
+    },
+    KeyA(){
+        controle.moveRight(-velocidade);
+        if(controles.phoenix.y+1 <= controles.phoenix.maxY) controles.phoenix.y++
+        controles.camera.y++
+    },
+    KeyD(){
+        controle.moveRight(velocidade);
+        if(controles.phoenix.y-1 >= controles.phoenix.minY) controles.phoenix.y--
+        controles.camera.y--
+    },
+    ShiftLeft(){
+        velocidade = 0.25;
+    },
+    KeyE(){
+        controle.getObject().position.y += 0.05;
+        if(controles.phoenix.x+1 <= controles.phoenix.maxX) controles.phoenix.x++
+    },
+    KeyQ(){
+        controle.getObject().position.y -= 0.05;
+        if(controles.phoenix.x-1 >= controles.phoenix.minX) controles.phoenix.x--
+    }
+
+}
+
 let posicoes = {
 
     posicaoCamera(){
-        camera.rotation.y = THREE.MathUtils.degToRad(controleCamera.y);
+        camera.rotation.y = THREE.MathUtils.degToRad(controles.camera.y);
     },
 
     posicaoPhoenix(){
         if(phoenix!==undefined){
-            phoenix.rotation.set(THREE.MathUtils.degToRad(controlePhoenix.x),
-                                 THREE.MathUtils.degToRad(controlePhoenix.y),
-                                 THREE.MathUtils.degToRad(controlePhoenix.z))
+            phoenix.rotation.set(THREE.MathUtils.degToRad(controles.phoenix.x),
+                                 THREE.MathUtils.degToRad(controles.phoenix.y),
+                                 THREE.MathUtils.degToRad(controles.phoenix.z))
         }
     }
+
 }
 
 let estabilizadores = {
@@ -215,20 +240,21 @@ let estabilizadores = {
     },
 
     estabilizarCamera(){
-        if (controleCamera.x !== 0 && !hasTecla('KeyI') && !hasTecla('KeyO')){
-            controleCamera.x += this.estabilizar(0, controleCamera.x);
+        if (controles.camera.x !== 0 && !hasTecla('KeyI') && !hasTecla('KeyO')){
+            controles.camera.x += this.estabilizar(0, controles.camera.x);
         }
     },
 
     estabilizarPhoenix(){
-        if (controlePhoenix.x !== -10 && !hasTecla('KeyE') && !hasTecla('KeyQ')){
-            controlePhoenix.x += this.estabilizar(-10, controlePhoenix.x);
+        if (controles.phoenix.x !== -10 && !hasTecla('KeyE') && !hasTecla('KeyQ')){
+            controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
         }
 
-        if (controlePhoenix.y !== 90 && !hasTecla('KeyA') && !hasTecla('KeyD')){
-            controlePhoenix.y += this.estabilizar(90, controlePhoenix.y);
+        if (controles.phoenix.y !== 90 && !hasTecla('KeyA') && !hasTecla('KeyD')){
+            controles.phoenix.y += this.estabilizar(90, controles.phoenix.y);
         }
     }
+
 }
 
 function hasTecla(tecla) {
@@ -249,6 +275,7 @@ function sombrearModelo(obj){
 function animate(){
     renderizador.render(cena, camera);
     movimentacao();
-    uptadeDistorcao();
+    updateDistorcao();
     requestAnimationFrame(animate);
-}animate();
+}
+animate();
