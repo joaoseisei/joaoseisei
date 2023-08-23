@@ -140,7 +140,7 @@ const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let teclasPressionadas = new Set();
-document.body.addEventListener('click', () => controle.lock());
+//document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
@@ -164,6 +164,10 @@ function movimentacao(){
 }
 
 let controles = {
+
+    verificadorMax: (ValAtual, ValMax) => ValAtual+1 <= ValMax ,
+
+    verificadorMin: (ValAtual, ValMin) => ValAtual-1 >= ValMin ,
 
     phoenix: {
         x: -10,
@@ -199,7 +203,7 @@ let gravidade = {
     incrementarVelocidade(){
         if(this.velocidade+1 <= this.velocidadeMax) this.velocidade += 0.01;
     },
-    camera(direcao){
+    movimentarCamera(direcao){
         camera.position.y += direcao * this.velocidade;
     }
 }
@@ -214,27 +218,33 @@ let identificadorTeclas = {
     },
     KeyA(){
         controle.moveRight(-velocidade);
-        if(controles.phoenix.y+1 <= controles.phoenix.maxY) controles.phoenix.y++
         controles.camera.y++
+
+        if(controles.verificadorMax(controles.phoenix.y, controles.phoenix.maxY)) controles.phoenix.y++
     },
     KeyD(){
         controle.moveRight(velocidade);
-        if(controles.phoenix.y-1 >= controles.phoenix.minY) controles.phoenix.y--
         controles.camera.y--
+
+        if(controles.verificadorMin(controles.phoenix.y, controles.phoenix.minY)) controles.phoenix.y--
     },
     ShiftLeft(){
         velocidade = 0.25;
     },
     KeyE(){
-        if(camera.position.y < controles.camera.maxY) gravidade.camera(+0.05);
-        if(controles.phoenix.x+1 <= controles.phoenix.maxX) controles.phoenix.x++
+        if(camera.position.y < controles.camera.maxY){
+            gravidade.movimentarCamera(+0.05);
+
+            if(controles.verificadorMax(controles.phoenix.x, controles.phoenix.maxX)) controles.phoenix.x++
+        }
+
     },
     KeyQ(){
         if(camera.position.y >= controles.camera.minY){
-            if(controles.phoenix.x-1 >= controles.phoenix.minX) controles.phoenix.x--
-
             camera.position.y > 2 ? gravidade.incrementarVelocidade() : gravidade.resetarGravidade();
-            gravidade.camera(-0.05);
+            gravidade.movimentarCamera(-0.05);
+
+            if(controles.verificadorMin(controles.phoenix.x, controles.phoenix.minX)) controles.phoenix.x--
         }
     }
 
@@ -255,6 +265,7 @@ let posicoes = {
     }
 
 }
+let hasTecla = (tecla) => teclasPressionadas.has(tecla);
 
 let estabilizadores = {
 
@@ -281,10 +292,6 @@ let estabilizadores = {
         }
     }
 
-}
-
-function hasTecla(tecla) {
-    return teclasPressionadas.has(tecla);
 }
 
 function mostrarObj(Obj){
