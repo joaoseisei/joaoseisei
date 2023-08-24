@@ -12,7 +12,7 @@ const GLTF = new GLTFLoader();
 let dimensoesTela = {largura: null, altura: null}
 let cena, camera, renderizador
 let ceu, sol, agua, planoAgua;
-let phoenix, esqueleto, mixer;
+let phoenix, esqueleto;
 
 function init(){
     cena = new THREE.Scene();
@@ -63,6 +63,7 @@ function initSky(){
         luz.shadow.mapSize.height = 1024;
 
         let configLuz = luz.shadow.camera;
+
         configLuz.near = 1;
         configLuz.far = 1000;
         configLuz.left = -500;
@@ -140,7 +141,7 @@ const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let teclasPressionadas = new Set();
-//document.body.addEventListener('click', () => controle.lock());
+document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
@@ -270,33 +271,22 @@ let estabilizadores = {
 
     estabilizar: (pontoMedio, atributo) => atributo > pontoMedio ? -1 : 1,
 
-    isEstavel: (obj, pontEquilibrio) => obj !== pontEquilibrio,
+    isntEstavel: (obj, pontEquilibrio) => obj !== pontEquilibrio,
 
     isTeclaPressionada: (teclas) => !teclas.some(tecla => Array.from(teclasPressionadas).includes(tecla)),
 
-    estabilizarCamera(){
-        this.isTeclaPressionada(['KeyI', 'KeyO'])
-        if(this.isEstavel(controles.camera.x, 0) && this.isTeclaPressionada(['KeyI', 'KeyO'])){
-            controles.camera.x += this.estabilizar(0, controles.camera.x);
-        }
-    },
-
     estabilizarPhoenix(){
-        if(this.isEstavel(controles.phoenix.x, -10)){
+        if(this.isntEstavel(controles.phoenix.x, -10)){
             if(camera.position.y < controles.camera.minY || this.isTeclaPressionada(['KeyE', 'KeyQ'])) {
                 controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
             }
         }
 
-        if(this.isEstavel(controles.phoenix.y, 90) && this.isTeclaPressionada(['KeyA', 'KeyD'])){
+        if(this.isntEstavel(controles.phoenix.y, 90) && this.isTeclaPressionada(['KeyA', 'KeyD'])){
             controles.phoenix.y += this.estabilizar(90, controles.phoenix.y);
         }
     }
 
-}
-
-function mostrarObj(Obj){
-    if(Obj !== undefined) Obj.visible = true;
 }
 
 function sombrearModelo(obj){
