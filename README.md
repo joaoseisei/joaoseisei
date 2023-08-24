@@ -17,5 +17,5 @@
 ## ⚙️ GitHub Analytics
 
 <p align="left">
-<img width="530em" src="https://github-readme-stats.vercel.app/api?username=joaoseisei&show_icons=true&theme=vision-friendly-dark="joaoseisei%27s%20stats"/>
+<img width="530em" src=https://github-readme-stats.vercel.app/api?username=joaoseisei&show_icons=true&theme=vision-friendly-dark>
 </p>
