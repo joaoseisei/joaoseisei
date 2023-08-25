@@ -153,11 +153,8 @@ document.addEventListener('keyup', event => {
  * Movimenta a camera nos eixos XYZ e anima o obj Phoenix.
  */
 function movimentacao(){
-    if(teclasPressionadas.size !== 0){
-        teclasPressionadas.forEach(teclas => {
-            if(identificadorTeclas[teclas] !== undefined) identificadorTeclas[teclas]();
-        });
-    }
+    teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.());
+
     posicoes.posicaoCamera();
     posicoes.posicaoPhoenix();
 
@@ -258,11 +255,11 @@ let posicoes = {
     },
 
     posicaoPhoenix(){
-        if(phoenix!==undefined){
-            phoenix.rotation.set(THREE.MathUtils.degToRad(controles.phoenix.x),
-                                 THREE.MathUtils.degToRad(controles.phoenix.y),
-                                 THREE.MathUtils.degToRad(controles.phoenix.z))
-        }
+        phoenix?.rotation.set(
+            THREE.MathUtils.degToRad(controles.phoenix.x),
+            THREE.MathUtils.degToRad(controles.phoenix.y),
+            THREE.MathUtils.degToRad(controles.phoenix.z)
+        );
     }
 
 }
