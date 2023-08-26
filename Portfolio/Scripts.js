@@ -7,7 +7,12 @@ import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/
 console.log("Scripts.js ok");
 document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 
-const GLTF = new GLTFLoader();
+const loadingManager = new THREE.LoadingManager();
+
+loadingManager.onProgress = (url, loaded, total) => console.log(`Carregamento concluido ${url}`);
+loadingManager.onError = error => console.error(error);
+
+const GLTF = new GLTFLoader(loadingManager);
 
 let dimensoesTela = {largura: null, altura: null}
 let cena, camera, renderizador
@@ -88,8 +93,8 @@ function initWater(){
             waterColor: 0x001e0f,
             distortionScale: camera.position.y,
 
-            waterNormals: new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg',
-                function (textura) {textura.wrapS = textura.wrapT = THREE.RepeatWrapping;}
+            waterNormals: new THREE.TextureLoader(loadingManager).load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg',
+                textura => textura.wrapS = textura.wrapT = THREE.RepeatWrapping
             )
         }
     );
