@@ -9,12 +9,9 @@ console.log("Scripts.js ok");
 const loadingManager = new THREE.LoadingManager();
 const barraProgresso = document.getElementById('barraProgresso');
 const carregamentoContainer = document.getElementById('telaCarregamentoContainer')
-loadingManager.onProgress = (url, loaded, total) => {
-    barraProgresso.value = 100 * loaded/total;
-    if(total === loaded) carregamentoContainer.style.display = 'none';
 
-    console.log(`Carregamento concluido ${url}`);
-};
+loadingManager.onProgress = (url, loaded, total) => barraProgresso.value = 100 * loaded/total;
+loadingManager.onLoad = () => carregamentoContainer.style.display = 'none';
 loadingManager.onError = error => console.error(error);
 
 const GLTF = new GLTFLoader(loadingManager);
@@ -151,7 +148,7 @@ const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let teclasPressionadas = new Set();
-document.body.addEventListener('click', () => controle.lock());
+// document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
