@@ -1,5 +1,4 @@
 body{
-    overflow: hidden;
     margin: 0;
     padding: 0;
 }
@@ -13,6 +12,7 @@ body{
     align-items: center;
     display: flex;
     background-color: white;
+    z-index: 1;
 }
 #barraProgresso{
     width: 30%;

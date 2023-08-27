@@ -148,10 +148,10 @@ const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
 let teclasPressionadas = new Set();
-// document.body.addEventListener('click', () => controle.lock());
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
 document.addEventListener('keyup', event => {
+    if(event.code === 'KeyM') controle.lock();
     if(event.code === "ShiftLeft") velocidade = 0.15;
     if(event.code === "KeyQ") gravidade.resetarGravidade();
 });

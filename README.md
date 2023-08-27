@@ -3,7 +3,7 @@
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=joaoseisei&color=blue" alt="Profile views" /> </p>
 
 - 🔭 I'm currently studying Software Engineering
-- 🌱 I’m currently learning Spring and APIs
+- 🌱 I’m currently learning Three.js and CSS.
 - 💬 Ask me about how to hate python
 
 ## 🛠 Tech Stack
