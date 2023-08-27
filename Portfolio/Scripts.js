@@ -5,11 +5,16 @@ import {GLTFLoader} from "https://unpkg.com/three@0.155.0/examples/jsm/loaders/G
 import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/PointerLockControls.js";
 
 console.log("Scripts.js ok");
-document.body.style.cssText = 'overflow: hidden; margin: 0; padding: 0';
 
 const loadingManager = new THREE.LoadingManager();
+const barraProgresso = document.getElementById('barraProgresso');
+const carregamentoContainer = document.getElementById('telaCarregamentoContainer')
+loadingManager.onProgress = (url, loaded, total) => {
+    barraProgresso.value = 100 * loaded/total;
+    if(total === loaded) carregamentoContainer.style.display = 'none';
 
-loadingManager.onProgress = (url, loaded, total) => console.log(`Carregamento concluido ${url}`);
+    console.log(`Carregamento concluido ${url}`);
+};
 loadingManager.onError = error => console.error(error);
 
 const GLTF = new GLTFLoader(loadingManager);
