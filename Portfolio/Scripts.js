@@ -7,6 +7,7 @@ import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/
 console.log("Scripts.js ok");
 
 const loadingManager = new THREE.LoadingManager();
+const GLTF = new GLTFLoader(loadingManager);
 const barraProgresso = document.getElementById('barraProgresso');
 const carregamentoContainer = document.getElementById('telaCarregamentoContainer')
 
@@ -14,9 +15,17 @@ loadingManager.onProgress = (url, loaded, total) => barraProgresso.value = 100 *
 loadingManager.onLoad = () => carregamentoContainer.style.display = 'none';
 loadingManager.onError = error => console.error(error);
 
-const GLTF = new GLTFLoader(loadingManager);
 
 let dimensoesTela = {largura: null, altura: null}
+let dispositivo ={
+    isPortable: false,
+    isPC: false,
+
+    setTipo() {
+        /Mobi|Android|ios/i.test(navigator.userAgent) ? this.isPortable = true : this.isPC = true;
+    }
+}
+
 let cena, camera, renderizador
 let ceu, sol, agua, planoAgua;
 let phoenix, esqueleto;
@@ -33,6 +42,7 @@ function init(){
     document.body.appendChild(renderizador.domElement);
 
     updateProporcao();
+    dispositivo.setTipo();
 
     initSky();
     initWater();
@@ -126,8 +136,8 @@ function initModelos(){
  * Atualiza a proporção da tela.
  */
 function updateProporcao(){
-    dimensoesTela.larguraTela = window.innerWidth;
-    dimensoesTela.alturaTela = window.innerHeight;
+    dimensoesTela.largura = window.innerWidth;
+    dimensoesTela.altura = window.innerHeight;
 
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
@@ -160,7 +170,8 @@ document.addEventListener('keyup', event => {
  * Movimenta a camera nos eixos XYZ e anima o obj Phoenix.
  */
 function movimentacao(){
-    teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.());
+    if(dispositivo.isPC) teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.());
+    if(dispositivo.isPortable) console.log('Sem Suporte ainda');
 
     posicoes.posicaoCamera();
     posicoes.posicaoPhoenix();
