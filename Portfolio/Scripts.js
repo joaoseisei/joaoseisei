@@ -166,18 +166,27 @@ document.addEventListener('keyup', event => {
     if(event.code === "KeyQ") gravidade.resetarGravidade();
 });
 
-/**
- * Movimenta a camera nos eixos XYZ e anima o obj Phoenix.
- */
-function movimentacao(){
-    if(dispositivo.isPC) teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.());
-    if(dispositivo.isPortable) console.log('Sem Suporte ainda');
+let movimentacao = {
+    andar(){},
 
-    posicoes.posicaoCamera();
-    posicoes.posicaoPhoenix();
+    initTipoMovimentacao(){
+        dispositivo.isPC
+            ? this.andar = () => teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.())
+            : this.andar = () => console.log('semSuporte')
+    },
 
-    estabilizadores.estabilizarPhoenix();
+    movimentacao(){
+        this.andar();
+
+        posicoes.posicaoCamera();
+        posicoes.posicaoPhoenix();
+
+        estabilizadores.estabilizarPhoenix();
+    }
+
 }
+movimentacao.initTipoMovimentacao();
+
 
 let controles = {
 
@@ -312,7 +321,7 @@ function sombrearModelo(obj){
 
 function animate(){
     renderizador.render(cena, camera);
-    movimentacao();
+    movimentacao.movimentacao();
     updateDistorcao();
     requestAnimationFrame(animate);
 }
