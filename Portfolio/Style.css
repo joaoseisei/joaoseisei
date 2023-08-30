@@ -23,3 +23,11 @@ body{
     color: black;
     font: 400% fantasy;
 }
+
+#joyDiv{
+    position: absolute;
+    right: 10%;
+    bottom: 10%;
+    width: 10%;
+    height: 10%;
+}

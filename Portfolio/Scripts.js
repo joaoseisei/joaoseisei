@@ -4,7 +4,29 @@ import {Water} from "https://unpkg.com/three@0.155.0/examples/jsm/objects/Water.
 import {GLTFLoader} from "https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js";
 import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/PointerLockControls.js";
 
+
 console.log("Scripts.js ok");
+
+window.addEventListener('load', () =>{
+    const joyDiv = document.getElementById('joyDiv');
+    const joystick = nipplejs.create({
+        zone: joyDiv,
+        color: 'black',
+        mode: 'semi',
+    });
+    joystick.on('start', (event, nipple) => {
+
+    });
+
+    joystick.on('move', (event, nipple) => {
+        const angle = nipple.angle.radian;
+        const distance = nipple.distance;
+
+    });
+
+    joystick.on('end', (event, nipple) => {
+    });
+});
 
 const loadingManager = new THREE.LoadingManager();
 const GLTF = new GLTFLoader(loadingManager);
@@ -17,14 +39,6 @@ loadingManager.onError = error => console.error(error);
 
 
 let dimensoesTela = {largura: null, altura: null}
-let dispositivo ={
-    isPortable: false,
-    isPC: false,
-
-    setTipo() {
-        /Mobi|Android|ios/i.test(navigator.userAgent) ? this.isPortable = true : this.isPC = true;
-    }
-}
 
 let cena, camera, renderizador
 let ceu, sol, agua, planoAgua;
@@ -42,7 +56,6 @@ function init(){
     document.body.appendChild(renderizador.domElement);
 
     updateProporcao();
-    dispositivo.setTipo();
 
     initSky();
     initWater();
@@ -170,9 +183,9 @@ let movimentacao = {
     andar(){},
 
     initTipoMovimentacao(){
-        dispositivo.isPC
-            ? this.andar = () => teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.())
-            : this.andar = () => console.log('semSuporte')
+        /Mobi|Android|ios/i.test(navigator.userAgent)
+            ? this.andar = () => console.log('semSuporte')
+            : this.andar = () => teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.())
     },
 
     movimentacao(){
