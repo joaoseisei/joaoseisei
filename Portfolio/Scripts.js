@@ -4,29 +4,7 @@ import {Water} from "https://unpkg.com/three@0.155.0/examples/jsm/objects/Water.
 import {GLTFLoader} from "https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js";
 import {PointerLockControls} from "https://unpkg.com/three@0.155.0/examples/jsm/controls/PointerLockControls.js";
 
-
 console.log("Scripts.js ok");
-
-window.addEventListener('load', () =>{
-    const joyDiv = document.getElementById('joyDiv');
-    const joystick = nipplejs.create({
-        zone: joyDiv,
-        color: 'black',
-        mode: 'semi',
-    });
-    joystick.on('start', (event, nipple) => {
-
-    });
-
-    joystick.on('move', (event, nipple) => {
-        const angle = nipple.angle.radian;
-        const distance = nipple.distance;
-
-    });
-
-    joystick.on('end', (event, nipple) => {
-    });
-});
 
 const loadingManager = new THREE.LoadingManager();
 const GLTF = new GLTFLoader(loadingManager);
@@ -170,6 +148,7 @@ function updateDistorcao(){
 const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
+const direcoesJoystick = new Set();
 let teclasPressionadas = new Set();
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
@@ -184,7 +163,7 @@ let movimentacao = {
 
     initTipoMovimentacao(){
         /Mobi|Android|ios/i.test(navigator.userAgent)
-            ? this.andar = () => console.log('semSuporte')
+            ? this.andar = () => direcoesJoystick.forEach(direcao => identificadorJoyStick[direcao]?.())
             : this.andar = () => teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.())
     },
 
@@ -246,6 +225,32 @@ let gravidade = {
     }
 }
 
+const joyDiv = document.getElementById('joyDiv');
+const joystick = nipplejs.create({
+    zone: joyDiv,
+    color: 'black',
+    mode: 'semi',
+});
+joystick.on('start', (event, nipple) => {
+
+});
+
+joystick.on('move', (event, nipple) => {
+    direcoesJoystick.clear();
+    const direcao = nipple.direction;
+
+    if(direcao){
+        direcoesJoystick.add(direcao.x);
+        direcoesJoystick.add(direcao.y);
+    }
+
+    console.log(direcoesJoystick);
+});
+joystick.on('end', (event, nipple) => {
+    direcoesJoystick.clear();
+});
+
+
 let identificadorTeclas = {
 
     KeyW(){
@@ -286,6 +291,13 @@ let identificadorTeclas = {
         }
     }
 
+}
+
+let identificadorJoyStick = {
+    up: identificadorTeclas.KeyW,
+    down: identificadorTeclas.KeyS,
+    left: identificadorTeclas.KeyA,
+    right: identificadorTeclas.KeyD
 }
 
 let posicoes = {
