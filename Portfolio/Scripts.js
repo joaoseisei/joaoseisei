@@ -148,7 +148,7 @@ function updateDistorcao(){
 const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
-const direcoesJoystick = new Set();
+let direcoesJoystick = new Set();
 let teclasPressionadas = new Set();
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
@@ -163,8 +163,8 @@ let movimentacao = {
 
     initTipoMovimentacao(){
         /Mobi|Android|ios/i.test(navigator.userAgent)
-            ? this.andar = () => direcoesJoystick.forEach(direcao => identificadorJoyStick[direcao]?.())
-            : this.andar = () => teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.())
+            ? this.andar = () => teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.())
+            : this.andar = () => direcoesJoystick.forEach(direcao => identificadorJoyStick[direcao]?.())
     },
 
     movimentacao(){
@@ -231,17 +231,15 @@ const joystick = nipplejs.create({
     color: 'black',
     mode: 'semi',
 });
-joystick.on('start', (event, nipple) => {
-
-});
 
 joystick.on('move', (event, nipple) => {
     direcoesJoystick.clear();
     const direcao = nipple.direction;
+    const angulo = nipple.angle.degree;
 
     if(direcao){
-        direcoesJoystick.add(direcao.x);
-        direcoesJoystick.add(direcao.y);
+        if(!((angulo <= 30 && angulo >= 250) || (angulo >= 150 && angulo >= 210))) direcoesJoystick.add(direcao.y);
+        if(!((angulo <= 120 && angulo >= 60) || (angulo >= 240 && angulo >= 300))) direcoesJoystick.add(direcao.x);
     }
 
     console.log(direcoesJoystick);
@@ -296,7 +294,9 @@ let identificadorTeclas = {
 let identificadorJoyStick = {
     up: identificadorTeclas.KeyW,
     down: identificadorTeclas.KeyS,
-    left: identificadorTeclas.KeyA,
+    left(){
+        identificadorTeclas.KeyA()
+    },
     right: identificadorTeclas.KeyD
 }
 
