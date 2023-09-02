@@ -148,7 +148,6 @@ function updateDistorcao(){
 const controle = new PointerLockControls(camera, renderizador.domElement);
 cena.add(controle.getObject());
 
-let direcoesJoystick = new Set();
 let teclasPressionadas = new Set();
 document.addEventListener('keydown', event=> teclasPressionadas.add(event.code));
 document.addEventListener('keyup', event=> teclasPressionadas.delete(event.code));
@@ -158,27 +157,29 @@ document.addEventListener('keyup', event => {
     if(event.code === "KeyQ") gravidade.resetarGravidade();
 });
 
-let movimentacao = {
-    andar(){},
+let direcoesJoystick = new Set();
+const joyDiv = document.getElementById('joyDiv');
+const joystick = nipplejs.create({
+    zone: joyDiv,
+    color: 'black',
+    mode: 'semi',
+});
+joystick.on('move', (event, nipple) => {
+    direcoesJoystick.clear();
+    const direcao = nipple.direction;
+    const angulo = nipple.angle.degree;
 
-    initTipoMovimentacao(){
-        /Mobi|Android|ios/i.test(navigator.userAgent)
-            ? this.andar = () => teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.())
-            : this.andar = () => direcoesJoystick.forEach(direcao => identificadorJoyStick[direcao]?.())
-    },
-
-    movimentacao(){
-        this.andar();
-
-        posicoes.posicaoCamera();
-        posicoes.posicaoPhoenix();
-
-        estabilizadores.estabilizarPhoenix();
+    if((angulo >= 10 && angulo <= 170) || (angulo >= 195 && angulo <= 345)){
+        direcoesJoystick.add(direcao?.y);
+    }
+    if((angulo <= 60) || (angulo >= 285) || (angulo >= 110 && angulo <= 260)){
+        direcoesJoystick.add(nipple.direction?.x);
     }
 
-}
-movimentacao.initTipoMovimentacao();
-
+});
+joystick.on('end', (event, nipple) => {
+    direcoesJoystick.clear();
+});
 
 let controles = {
 
@@ -214,40 +215,16 @@ let gravidade = {
     velocidade: 1,
     velocidadeMax: 10,
 
-    resetarGravidade(){
+    resetarGravidade() {
         this.velocidade = 1;
     },
-    incrementarVelocidade(){
-        if(this.velocidade+1 <= this.velocidadeMax) this.velocidade += 0.01;
+    incrementarVelocidade() {
+        if (this.velocidade + 1 <= this.velocidadeMax) this.velocidade += 0.01;
     },
-    movimentarCamera(direcao){
+    movimentarCamera(direcao) {
         camera.position.y += direcao * this.velocidade;
     }
 }
-
-const joyDiv = document.getElementById('joyDiv');
-const joystick = nipplejs.create({
-    zone: joyDiv,
-    color: 'black',
-    mode: 'semi',
-});
-
-joystick.on('move', (event, nipple) => {
-    direcoesJoystick.clear();
-    const direcao = nipple.direction;
-    const angulo = nipple.angle.degree;
-
-    if(direcao){
-        if(!((angulo <= 30 && angulo >= 250) || (angulo >= 150 && angulo >= 210))) direcoesJoystick.add(direcao.y);
-        if(!((angulo <= 120 && angulo >= 60) || (angulo >= 240 && angulo >= 300))) direcoesJoystick.add(direcao.x);
-    }
-
-    console.log(direcoesJoystick);
-});
-joystick.on('end', (event, nipple) => {
-    direcoesJoystick.clear();
-});
-
 
 let identificadorTeclas = {
 
@@ -292,11 +269,9 @@ let identificadorTeclas = {
 }
 
 let identificadorJoyStick = {
-    up: identificadorTeclas.KeyW,
-    down: identificadorTeclas.KeyS,
-    left(){
-        identificadorTeclas.KeyA()
-    },
+    up: identificadorTeclas.KeyE,
+    down: identificadorTeclas.KeyQ,
+    left: identificadorTeclas.KeyA,
     right: identificadorTeclas.KeyD
 }
 
@@ -324,7 +299,9 @@ let estabilizadores = {
 
     isTeclaPressionada: (teclas) => !teclas.some(tecla => Array.from(teclasPressionadas).includes(tecla)),
 
-    estabilizarPhoenix(){
+    isJoystickPressionado: (direcoes) => !direcoes.some(direcao => Array.from(direcoesJoystick).includes(direcao)),
+
+    estabilizarPhoenixPC() {
         if(this.isntEstavel(controles.phoenix.x, -10)){
             if(camera.position.y < controles.camera.minY || this.isTeclaPressionada(['KeyE', 'KeyQ'])) {
                 controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
@@ -334,9 +311,49 @@ let estabilizadores = {
         if(this.isntEstavel(controles.phoenix.y, 90) && this.isTeclaPressionada(['KeyA', 'KeyD'])){
             controles.phoenix.y += this.estabilizar(90, controles.phoenix.y);
         }
+    },
+
+    estabilizarPhoenixPortavel(){
+        if(this.isntEstavel(controles.phoenix.x, -10)){
+            if(camera.position.y < controles.camera.minY || this.isJoystickPressionado(['up', 'down'])){
+                controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
+            }
+        }
+
+        if(this.isntEstavel(controles.phoenix.y, 90) && this.isJoystickPressionado(['left', 'right'])){
+            controles.phoenix.y += this.estabilizar(90, controles.phoenix.y);
+        }
     }
 
 }
+
+let movimentacao = {
+    andar(){},
+    estabilizar(){},
+
+    initTipoMovimentacao(){
+        if(/Mobi|Android|ios/i.test(navigator.userAgent)){
+            this.andar = () => direcoesJoystick.forEach(direcao => identificadorJoyStick[direcao]?.());
+            this.estabilizar = () => estabilizadores.estabilizarPhoenixPortavel();
+        }
+        else{
+            this.andar = () => teclasPressionadas.forEach(tecla => identificadorTeclas[tecla]?.());
+            this.estabilizar = () => estabilizadores.estabilizarPhoenixPC();
+        }
+
+    },
+
+    movimentacao(){
+        this.andar();
+
+        posicoes.posicaoCamera();
+        posicoes.posicaoPhoenix();
+
+        this.estabilizar();
+    }
+
+}
+movimentacao.initTipoMovimentacao();
 
 function sombrearModelo(obj){
     obj.traverse(child => {
