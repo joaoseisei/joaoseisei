@@ -8,13 +8,13 @@ console.log("Scripts.js ok");
 
 const loadingManager = new THREE.LoadingManager();
 const GLTF = new GLTFLoader(loadingManager);
+
 const barraProgresso = document.getElementById('barraProgresso');
 const carregamentoContainer = document.getElementById('telaCarregamentoContainer')
 
 loadingManager.onProgress = (url, loaded, total) => barraProgresso.value = 100 * loaded/total;
 loadingManager.onLoad = () => carregamentoContainer.style.display = 'none';
 loadingManager.onError = error => console.error(error);
-
 
 let dimensoesTela = {largura: null, altura: null}
 
@@ -123,9 +123,6 @@ function initModelos(){
 
 }
 
-/**
- * Atualiza a proporção da tela.
- */
 function updateProporcao(){
     dimensoesTela.largura = window.innerWidth;
     dimensoesTela.altura = window.innerHeight;
@@ -136,9 +133,6 @@ function updateProporcao(){
 }
 window.addEventListener("resize", updateProporcao);
 
-/**
- * Atualiza a reflexão da água e anima a mesma.
- */
 function updateDistorcao(){
     agua.material.uniforms.time.value += 1/80;
     agua.material.uniforms.distortionScale.value = camera.position.y;
@@ -157,29 +151,25 @@ document.addEventListener('keyup', event => {
     if(event.code === "KeyQ") gravidade.resetarGravidade();
 });
 
-let direcoesJoystick = new Set();
 const joyDiv = document.getElementById('joyDiv');
 const joystick = nipplejs.create({
     zone: joyDiv,
     color: 'black',
     mode: 'semi',
 });
+
+let direcoesJoystick = new Set();
 joystick.on('move', (event, nipple) => {
     direcoesJoystick.clear();
+
     const direcao = nipple.direction;
     const angulo = nipple.angle.degree;
 
-    if((angulo >= 10 && angulo <= 170) || (angulo >= 195 && angulo <= 345)){
-        direcoesJoystick.add(direcao?.y);
-    }
-    if((angulo <= 60) || (angulo >= 285) || (angulo >= 110 && angulo <= 260)){
-        direcoesJoystick.add(nipple.direction?.x);
-    }
+    if((angulo >= 10 && angulo <= 170) || (angulo >= 195 && angulo <= 345)) direcoesJoystick.add(direcao?.y);
+    if((angulo <= 60) || (angulo >= 285) || (angulo >= 110 && angulo <= 260)) direcoesJoystick.add(direcao?.x);
 
 });
-joystick.on('end', (event, nipple) => {
-    direcoesJoystick.clear();
-});
+joystick.on('end', () => direcoesJoystick.clear());
 
 let controles = {
 
@@ -303,7 +293,7 @@ let estabilizadores = {
 
     estabilizarPhoenixPC() {
         if(this.isntEstavel(controles.phoenix.x, -10)){
-            if(camera.position.y < controles.camera.minY || this.isTeclaPressionada(['KeyE', 'KeyQ'])) {
+            if(camera.position.y < controles.camera.minY || this.isTeclaPressionada(['KeyE', 'KeyQ'])){
                 controles.phoenix.x += this.estabilizar(-10, controles.phoenix.x);
             }
         }
@@ -333,7 +323,11 @@ let movimentacao = {
 
     initTipoMovimentacao(){
         if(/Mobi|Android|ios/i.test(navigator.userAgent)){
-            this.andar = () => direcoesJoystick.forEach(direcao => identificadorJoyStick[direcao]?.());
+            document.getElementById('joyDiv').style.display = 'flex';
+            this.andar = () => {
+                direcoesJoystick.forEach(direcao => identificadorJoyStick[direcao]?.());
+                identificadorTeclas.KeyW();
+            }
             this.estabilizar = () => estabilizadores.estabilizarPhoenixPortavel();
         }
         else{
@@ -343,13 +337,12 @@ let movimentacao = {
 
     },
 
-    movimentacao(){
+    movimentar(){
         this.andar();
+        this.estabilizar();
 
         posicoes.posicaoCamera();
         posicoes.posicaoPhoenix();
-
-        this.estabilizar();
     }
 
 }
@@ -363,7 +356,7 @@ function sombrearModelo(obj){
 
 function animate(){
     renderizador.render(cena, camera);
-    movimentacao.movimentacao();
+    movimentacao.movimentar();
     updateDistorcao();
     requestAnimationFrame(animate);
 }
