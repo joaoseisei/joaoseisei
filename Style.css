@@ -10,7 +10,7 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    display: flex;
+    display: none;
     background-color: white;
     z-index: 1;
 }
