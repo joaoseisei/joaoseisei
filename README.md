@@ -1,10 +1,9 @@
-# Hi 👋, I'am Jao
+# Hi 👋, I am Jao
 <img src="https://raw.githubusercontent.com/MicaelliMedeiros/micaellimedeiros/master/image/computer-illustration.png" min-width="400px" max-width="300px" width="300px" align="right">
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=joaoseisei&color=blue" alt="Profile views" /> </p>
 
 - 🔭 I'm currently studying Software Engineering
-- 🌱 I’m currently learning React
-- 💬 Ask me about how to hate python
+- 🌱 I’m currently learning gohugo and PostGres
 
 ## 🛠 Tech Stack
 
