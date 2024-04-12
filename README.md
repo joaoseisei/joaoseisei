@@ -3,7 +3,7 @@
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=joaoseisei&color=blue" alt="Profile views" /> </p>
 
 - 🔭 I'm currently studying Software Engineering
-- 🌱 I’m currently learning gohugo and PostGres
+- 🌱 I’m currently learning gohugo and PostGreSQL
 
 ## 🛠 Tech Stack
 
